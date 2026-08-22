@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Judo-Teori Træner</title>
+<style>
+  :root {
+    --bg: #14181f;
+    --panel: #1e232c;
+    --accent: #d4a03c;
+    --text: #f0f0f0;
+    --correct: #3ca35c;
+    --wrong: #c9453b;
+    --focus: #ffcf5c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", Arial, sans-serif;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 1.2rem;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.5rem; margin-bottom: 0.2rem; }
+  p.sub { color: #aaa; margin-top: 0; }
+  .panel {
+    background: var(--panel);
+    border-radius: 10px;
+    padding: 1.2rem;
+    margin-bottom: 1rem;
+  }
+  button {
+    font-size: 1rem;
+    padding: 0.7rem 1rem;
+    border-radius: 8px;
+    border: 2px solid var(--accent);
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    display: block;
+    width: 100%;
+    text-align: left;
+    margin-bottom: 0.6rem;
+  }
+  button:hover:not(:disabled) { background: rgba(212,160,60,0.15); }
+  button:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+  }
+  button:disabled { cursor: default; opacity: 0.9; }
+  button.correct { border-color: var(--correct); background: rgba(60,163,92,0.25); }
+  button.wrong { border-color: var(--wrong); background: rgba(201,69,59,0.25); }
+  .belt-btn.locked { opacity: 0.5; border-color: #555; cursor: not-allowed; }
+  #question-num { font-weight: bold; color: var(--accent); }
+  #feedback { min-height: 1.6rem; font-weight: bold; margin-top: 0.5rem; }
+  #feedback.correct-text { color: var(--correct); }
+  #feedback.wrong-text { color: var(--wrong); }
+  #next-btn { border-color: var(--accent); background: var(--accent); color: #1a1a1a; font-weight: bold; }
+  #score-summary { font-size: 1.2rem; }
+  a, a:visited { color: var(--accent); }
+  .skip-link {
+    position: absolute; left: -9999px; top: 0;
+    background: var(--accent); color: #000; padding: 0.5rem 1rem; z-index: 100;
+  }
+  .skip-link:focus { left: 0.5rem; top: 0.5rem; }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Spring til indhold</a>
+
+<h1>🥋 Judo-Teori Træner</h1>
+<p class="sub">Træn teorien til din bæltegraduering — baseret på Judo Danmarks officielle pensum.</p>
+
+<main id="main">
+
+  <section id="belt-select" class="panel" aria-labelledby="belt-heading">
+    <h2 id="belt-heading">Vælg bælte du træner til</h2>
+    <div id="belt-buttons" role="group" aria-label="Vælg bælteniveau"></div>
+  </section>
+
+  <section id="quiz-area" class="panel" hidden aria-live="polite">
+    <p id="question-num"></p>
+    <h2 id="question-text"></h2>
+    <div id="answer-buttons" role="group" aria-label="Svarmuligheder"></div>
+    <p id="feedback" role="status" aria-live="assertive"></p>
+    <button id="next-btn" hidden>Næste spørgsmål</button>
+  </section>
+
+  <section id="result-area" class="panel" hidden aria-live="polite">
+    <h2>Resultat</h2>
+    <p id="score-summary"></p>
+    <button id="restart-btn">Prøv igen</button>
+    <button id="back-btn">Vælg andet bælte</button>
+  </section>
+
+  <p><a href="https://github.com/larsholms/judo-teori" >Se koden på GitHub</a></p>
+
+</main>
+
+<script src="data.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  const beltSelect = document.getElementById("belt-select");
+  const beltButtons = document.getElementById("belt-buttons");
+  const quizArea = document.getElementById("quiz-area");
+  const resultArea = document.getElementById("result-area");
+  const questionNum = document.getElementById("question-num");
+  const questionText = document.getElementById("question-text");
+  const answerButtons = document.getElementById("answer-buttons");
+  const feedback = document.getElementById("feedback");
+  const nextBtn = document.getElementById("next-btn");
+  const scoreSummary = document.getElementById("score-summary");
+  const restartBtn = document.getElementById("restart-btn");
+  const backBtn = document.getElementById("back-btn");
+
+  let currentBeltKey = null;
+  let questions = [];
+  let currentIndex = 0;
+  let score = 0;
+  let answered = false;
+
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function renderBeltButtons() {
+    beltButtons.innerHTML = "";
+    Object.keys(QUIZ_DATA).forEach(function (key) {
+      const belt = QUIZ_DATA[key];
+      const btn = document.createElement("button");
+      btn.className = "belt-btn" + (belt.locked ? " locked" : "");
+      btn.textContent = belt.locked ? belt.label + " (kommer snart)" : belt.label;
+      if (belt.locked) {
+        btn.setAttribute("aria-disabled", "true");
+        btn.addEventListener("click", function () {
+          feedback.textContent = "";
+        });
+      } else {
+        btn.addEventListener("click", function () { startQuiz(key); });
+      }
+      beltButtons.appendChild(btn);
+    });
+  }
+
+  function startQuiz(key) {
+    currentBeltKey = key;
+    questions = shuffle(QUIZ_DATA[key].questions);
+    currentIndex = 0;
+    score = 0;
+    beltSelect.hidden = true;
+    resultArea.hidden = true;
+    quizArea.hidden = false;
+    showQuestion();
+  }
+
+  function showQuestion() {
+    answered = false;
+    feedback.textContent = "";
+    feedback.className = "";
+    nextBtn.hidden = true;
+    const q = questions[currentIndex];
+    questionNum.textContent = "Spørgsmål " + (currentIndex + 1) + " af " + questions.length + " — " + QUIZ_DATA[currentBeltKey].label;
+    questionText.textContent = q.q;
+    answerButtons.innerHTML = "";
+
+    const optionOrder = shuffle(q.options.map(function (opt, i) { return { text: opt, isCorrect: i === q.answer }; }));
+
+    optionOrder.forEach(function (opt) {
+      const btn = document.createElement("button");
+      btn.textContent = opt.text;
+      btn.addEventListener("click", function () { selectAnswer(btn, opt.isCorrect); });
+      answerButtons.appendChild(btn);
+    });
+
+    questionText.setAttribute("tabindex", "-1");
+    questionText.focus();
+  }
+
+  function selectAnswer(btn, isCorrect) {
+    if (answered) return;
+    answered = true;
+    const allButtons = answerButtons.querySelectorAll("button");
+    allButtons.forEach(function (b) { b.disabled = true; });
+
+    if (isCorrect) {
+      btn.classList.add("correct");
+      feedback.textContent = "Rigtigt! ✓";
+      feedback.className = "correct-text";
+      score++;
+    } else {
+      btn.classList.add("wrong");
+      feedback.textContent = "Forkert. Det rigtige svar er markeret med grønt.";
+      feedback.className = "wrong-text";
+      allButtons.forEach(function (b) {
+        if (b.textContent === questions[currentIndex].options[questions[currentIndex].answer]) {
+          b.classList.add("correct");
+        }
+      });
+    }
+    nextBtn.hidden = false;
+    nextBtn.focus();
+  }
+
+  nextBtn.addEventListener("click", function () {
+    currentIndex++;
+    if (currentIndex < questions.length) {
+      showQuestion();
+    } else {
+      showResult();
+    }
+  });
+
+  function showResult() {
+    quizArea.hidden = true;
+    resultArea.hidden = false;
+    const pct = Math.round((score / questions.length) * 100);
+    scoreSummary.textContent = "Du fik " + score + " ud af " + questions.length + " rigtige (" + pct + "%).";
+    scoreSummary.setAttribute("tabindex", "-1");
+    scoreSummary.focus();
+  }
+
+  restartBtn.addEventListener("click", function () { startQuiz(currentBeltKey); });
+  backBtn.addEventListener("click", function () {
+    resultArea.hidden = true;
+    beltSelect.hidden = false;
+    beltButtons.querySelector("button").focus();
+  });
+
+  renderBeltButtons();
+})();
+</script>
+</body>
+</html>
