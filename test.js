@@ -1,0 +1,72 @@
+const fs = require('fs');
+const vm = require('vm');
+const assert = require('assert');
+
+const dataSource = fs.readFileSync('data.js', 'utf8');
+const context = {};
+vm.createContext(context);
+vm.runInContext(dataSource.replace('const QUIZ_DATA', 'this.QUIZ_DATA'), context);
+const data = context.QUIZ_DATA;
+const html = fs.readFileSync('index.html', 'utf8');
+
+function test(name, fn) {
+  try { fn(); console.log('✓ ' + name); }
+  catch (err) { console.error('✗ ' + name + '\n  ' + err.message); process.exitCode = 1; }
+}
+
+test('orange og grønt bælte er låst op med mindst 25 spørgsmål hver', () => {
+  for (const key of ['4kyu', '3kyu']) {
+    assert.notStrictEqual(data[key].locked, true, key + ' er stadig låst');
+    assert.ok(Array.isArray(data[key].questions), key + ' mangler spørgsmål');
+    assert.ok(data[key].questions.length >= 25, key + ' har færre end 25 spørgsmål');
+  }
+});
+
+test('alle spørgsmål har fire unikke svar og gyldigt korrekt svar', () => {
+  for (const [belt, level] of Object.entries(data)) {
+    if (!level.questions) continue;
+    for (const [i, q] of level.questions.entries()) {
+      assert.strictEqual(q.options.length, 4, `${belt} spørgsmål ${i + 1}`);
+      assert.strictEqual(new Set(q.options).size, 4, `${belt} spørgsmål ${i + 1} har dubletter`);
+      assert.ok(Number.isInteger(q.answer) && q.answer >= 0 && q.answer < 4, `${belt} spørgsmål ${i + 1}`);
+    }
+  }
+});
+
+test('forkert svar annoncerer selve det korrekte svar for skærmlæser', () => {
+  assert.ok(html.includes('feedback.textContent = "Forkert. Det rigtige svar er " + correctAnswer + "."'));
+  assert.match(html, /role="status" aria-live="assertive"/);
+});
+
+test('korrekt svar får både synligt ikon og tekstlig tilgængelig markering', () => {
+  assert.match(html, /correct-icon/);
+  assert.match(html, /addAnswerIcon\([^\n]*"Korrekt svar"\)/);
+});
+
+test('forkert svar får synligt ikon og tekstlig tilgængelig markering', () => {
+  assert.match(html, /wrong-icon/);
+  assert.match(html, /addAnswerIcon\([^\n]*"Forkert svar"\)/);
+});
+
+test('Web Audio bruges til særskilte rigtigt- og forkertlyde', () => {
+  assert.match(html, /function playCorrectSound/);
+  assert.match(html, /function playWrongSound/);
+  assert.match(html, /AudioContext/);
+});
+
+test('feedbackfarver har mindst WCAG AA-kontrast mod panelet', () => {
+  function luminance(hex) {
+    const rgb = hex.match(/[0-9a-f]{2}/gi).map(v => parseInt(v, 16) / 255);
+    const linear = rgb.map(c => c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+    return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2];
+  }
+  function contrast(a, b) {
+    const values = [luminance(a), luminance(b)].sort((x, y) => y - x);
+    return (values[0] + 0.05) / (values[1] + 0.05);
+  }
+  const panel = html.match(/--panel:\s*(#[0-9a-f]{6})/i)[1];
+  for (const variable of ['correct', 'wrong']) {
+    const color = html.match(new RegExp(`--${variable}:\\s*(#[0-9a-f]{6})`, 'i'))[1];
+    assert.ok(contrast(color, panel) >= 4.5, `${variable} har for lav kontrast`);
+  }
+});

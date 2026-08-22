@@ -11,7 +11,7 @@
     --accent: #d4a03c;
     --text: #f0f0f0;
     --correct: #3ca35c;
-    --wrong: #c9453b;
+    --wrong: #ff8b83;
     --focus: #ffcf5c;
   }
   * { box-sizing: border-box; }
@@ -53,6 +53,9 @@
   button:disabled { cursor: default; opacity: 0.9; }
   button.correct { border-color: var(--correct); background: rgba(60,163,92,0.25); }
   button.wrong { border-color: var(--wrong); background: rgba(201,69,59,0.25); }
+  .answer-icon { display: inline-block; width: 1.5em; font-weight: bold; }
+  .correct-icon { color: #78e596; }
+  .wrong-icon { color: #ff8b83; }
   .belt-btn.locked { opacity: 0.5; border-color: #555; cursor: not-allowed; }
   #question-num { font-weight: bold; color: var(--accent); }
   #feedback { min-height: 1.6rem; font-weight: bold; margin-top: 0.5rem; }
@@ -71,8 +74,10 @@
 <body>
 <a class="skip-link" href="#main">Spring til indhold</a>
 
-<h1>🥋 Judo-Teori Træner</h1>
-<p class="sub">Træn teorien til din bæltegraduering — baseret på Judo Danmarks officielle pensum.</p>
+<header>
+  <h1>🥋 Judo-Teori Træner</h1>
+  <p class="sub">Træn teorien til din bæltegraduering — baseret på Judo Danmarks officielle pensum.</p>
+</header>
 
 <main id="main">
 
@@ -81,7 +86,7 @@
     <div id="belt-buttons" role="group" aria-label="Vælg bælteniveau"></div>
   </section>
 
-  <section id="quiz-area" class="panel" hidden aria-live="polite">
+  <section id="quiz-area" class="panel" hidden>
     <p id="question-num"></p>
     <h2 id="question-text"></h2>
     <div id="answer-buttons" role="group" aria-label="Svarmuligheder"></div>
@@ -123,6 +128,64 @@
   let currentIndex = 0;
   let score = 0;
   let answered = false;
+  let audioContext = null;
+
+  function getAudioContext() {
+    if (!audioContext) {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return null;
+      audioContext = new AudioContextClass();
+    }
+    if (audioContext.state === "suspended") audioContext.resume();
+    return audioContext;
+  }
+
+  function playTone(ctx, frequency, start, duration, type, volume) {
+    const oscillator = ctx.createOscillator();
+    const gain = ctx.createGain();
+    oscillator.type = type;
+    oscillator.frequency.setValueAtTime(frequency, start);
+    gain.gain.setValueAtTime(0.0001, start);
+    gain.gain.exponentialRampToValueAtTime(volume, start + 0.015);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+    oscillator.connect(gain).connect(ctx.destination);
+    oscillator.start(start);
+    oscillator.stop(start + duration);
+  }
+
+  function playCorrectSound() {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    [659.25, 783.99, 987.77].forEach(function (frequency, index) {
+      playTone(ctx, frequency, now + index * 0.11, 0.18, "sine", 0.13);
+    });
+  }
+
+  function playWrongSound() {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    const oscillator = ctx.createOscillator();
+    const gain = ctx.createGain();
+    oscillator.type = "sawtooth";
+    oscillator.frequency.setValueAtTime(180, now);
+    oscillator.frequency.exponentialRampToValueAtTime(75, now + 0.7);
+    gain.gain.setValueAtTime(0.09, now);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.72);
+    oscillator.connect(gain).connect(ctx.destination);
+    oscillator.start(now);
+    oscillator.stop(now + 0.72);
+  }
+
+  function addAnswerIcon(button, symbol, className, ariaLabel) {
+    const icon = document.createElement("span");
+    icon.className = "answer-icon " + className;
+    icon.setAttribute("aria-hidden", "true");
+    icon.textContent = symbol;
+    button.prepend(icon);
+    button.setAttribute("aria-label", ariaLabel + ": " + button.dataset.answerText);
+  }
 
   function shuffle(arr) {
     const a = arr.slice();
@@ -178,6 +241,8 @@
     optionOrder.forEach(function (opt) {
       const btn = document.createElement("button");
       btn.textContent = opt.text;
+      btn.dataset.answerText = opt.text;
+      btn.dataset.correct = String(opt.isCorrect);
       btn.addEventListener("click", function () { selectAnswer(btn, opt.isCorrect); });
       answerButtons.appendChild(btn);
     });
@@ -194,18 +259,24 @@
 
     if (isCorrect) {
       btn.classList.add("correct");
-      feedback.textContent = "Rigtigt! ✓";
+      addAnswerIcon(btn, "✓", "correct-icon", "Korrekt svar");
+      feedback.textContent = "Rigtigt! Det korrekte svar er " + btn.dataset.answerText + ".";
       feedback.className = "correct-text";
+      playCorrectSound();
       score++;
     } else {
       btn.classList.add("wrong");
-      feedback.textContent = "Forkert. Det rigtige svar er markeret med grønt.";
+      addAnswerIcon(btn, "✗", "wrong-icon", "Forkert svar");
+      const correctAnswer = questions[currentIndex].options[questions[currentIndex].answer];
+      feedback.textContent = "Forkert. Det rigtige svar er " + correctAnswer + ".";
       feedback.className = "wrong-text";
       allButtons.forEach(function (b) {
-        if (b.textContent === questions[currentIndex].options[questions[currentIndex].answer]) {
+        if (b.dataset.correct === "true") {
           b.classList.add("correct");
+          addAnswerIcon(b, "✓", "correct-icon", "Korrekt svar");
         }
       });
+      playWrongSound();
     }
     nextBtn.hidden = false;
     nextBtn.focus();
