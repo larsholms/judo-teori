@@ -66,4 +66,11 @@ assert.match(document.getElementById('feedback').textContent, /^Rigtigt! Det kor
 assert.ok(correct.querySelector('.correct-icon'));
 assert.strictEqual(oscillatorStarts - startsBeforeCorrect, 3, 'Rigtigtlyden skal have tre pling-toner');
 
-console.log('✓ browseradfærd: orange/grøn, feedback, ikoner, aria-labels og lyde');
+// Blåt og brunt er tilgængelige og starter hver sin quiz med 30 spørgsmål.
+for (const label of ['2. kyu', '1. kyu']) {
+  selectBelt(label);
+  assert.match(document.getElementById('question-num').textContent, new RegExp(label.replace('.', '\\.')));
+  assert.match(document.getElementById('question-num').textContent, /af 30/);
+}
+
+console.log('✓ browseradfærd: alle fem bælter, feedback, ikoner, aria-labels og lyde');

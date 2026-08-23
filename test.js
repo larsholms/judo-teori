@@ -14,12 +14,17 @@ function test(name, fn) {
   catch (err) { console.error('✗ ' + name + '\n  ' + err.message); process.exitCode = 1; }
 }
 
-test('orange og grønt bælte er låst op med mindst 25 spørgsmål hver', () => {
-  for (const key of ['4kyu', '3kyu']) {
+test('orange, grønt, blåt og brunt bælte er låst op med 30 spørgsmål hver', () => {
+  for (const key of ['4kyu', '3kyu', '2kyu', '1kyu']) {
     assert.notStrictEqual(data[key].locked, true, key + ' er stadig låst');
     assert.ok(Array.isArray(data[key].questions), key + ' mangler spørgsmål');
-    assert.ok(data[key].questions.length >= 25, key + ' har færre end 25 spørgsmål');
+    assert.strictEqual(data[key].questions.length, 30, key + ' har ikke 30 spørgsmål');
   }
+});
+
+test('blåt og brunt bælte har sporbar kilde til det officielle pensum', () => {
+  assert.strictEqual(data['2kyu'].sourcePages, '9-10');
+  assert.strictEqual(data['1kyu'].sourcePages, '11');
 });
 
 test('alle spørgsmål har fire unikke svar og gyldigt korrekt svar', () => {
@@ -31,6 +36,12 @@ test('alle spørgsmål har fire unikke svar og gyldigt korrekt svar', () => {
       assert.ok(Number.isInteger(q.answer) && q.answer >= 0 && q.answer < 4, `${belt} spørgsmål ${i + 1}`);
     }
   }
+});
+
+test('appen oplyser målgruppe, kilde og uafhængig status', () => {
+  assert.match(html, /børn og unge \(6-14 år\)/i);
+  assert.match(html, /https:\/\/www\.judo\.dk\/for-klubberne\/pensum/);
+  assert.match(html, /uafhængigt træningsværktøj/i);
 });
 
 test('forkert svar annoncerer selve det korrekte svar for skærmlæser', () => {

@@ -1,6 +1,6 @@
-// Judo-teori quiz data — 5.-3.kyu (gult, orange og grønt bælte), Børn/Ungdom
+// Judo-teori quiz data — 5.-1.kyu (gult til brunt bælte), Børn/Ungdom
 // Primær og autoritativ kilde: Judo Danmark, Gradueringsudvalget,
-// Pensum 5.kyu-1.kyu, Børn/Ungdom (opdateret februar 2024), side 3-8.
+// Pensum 5.kyu-1.kyu, Børn/Ungdom (opdateret februar 2024), side 3-11.
 
 const QUIZ_DATA = {
   "5kyu": {
@@ -231,6 +231,78 @@ const QUIZ_DATA = {
       { q: "Hvad er minimumstiden ved 3.kyu ifølge pensummet?", options: ["3 måneder", "4 måneder", "5 måneder", "6 måneder"], answer: 2 }
     ]
   },
-  "2kyu": { label: "2. kyu — Blåt bælte", locked: true },
-  "1kyu": { label: "1. kyu — Brunt bælte", locked: true }
+  "2kyu": {
+    label: "2. kyu — Blåt bælte",
+    minTid: "Minimumstid 5 måneder",
+    sourcePages: "9-10",
+    questions: [
+      { q: "Hvad betyder SEOI-NAGE (ERI)?", options: ["Skulderkast i revers", "Skulderhjul", "Øsekast", "Inderlårskast"], answer: 0 },
+      { q: "Hvad betyder ERI?", options: ["Skulder", "Krave eller revers", "Arm", "Knæ"], answer: 1 },
+      { q: "Hvad betyder KATA-GURUMA?", options: ["Knæhjul", "Skulderhjul", "Hoftehjul", "Kropsdrejning"], answer: 1 },
+      { q: "Hvad kan KATA betyde i KATA-GURUMA?", options: ["Skulder", "Hofte", "Knæ", "Arm"], answer: 0 },
+      { q: "Hvad betyder GURUMA?", options: ["Kontrol", "Hjul", "Kast", "Snoning"], answer: 1 },
+      { q: "Hvilken kasteteknik er SUKUI-NAGE?", options: ["Øsekast", "Skulderkast", "Cirkelkast", "Rygsidekast"], answer: 0 },
+      { q: "Hvad betyder TSURIKOMI-GOSHI?", options: ["Flydende hofte", "Fejende hofte", "Løfte trække hofte", "Stor hofte"], answer: 2 },
+      { q: "Hvad betyder TSURIKOMI?", options: ["Løfte op og trække ned", "Feje udvendigt", "Rulle fremad", "Lade falde"], answer: 0 },
+      { q: "Hvad betyder GOSHI (KOSHI)?", options: ["Arm", "Skulder", "Hofte", "Ben"], answer: 2 },
+      { q: "Hvad betyder UCHI-MATA?", options: ["Inderlårskast", "Indvendig fejning", "Knæhjul", "Udvendig omvikling"], answer: 0 },
+      { q: "Hvad betyder UCHI?", options: ["Udvendig", "Indvendig", "Ovenpå", "Bagfra"], answer: 1 },
+      { q: "Hvad betyder MATA?", options: ["Knæ", "Inderlår", "Skulder", "Krave"], answer: 1 },
+      { q: "Hvad betyder KATA-GATAME?", options: ["Skulderkontrol", "Armstrakt kontrol", "Knækontrol", "Sidekontrol"], answer: 0 },
+      { q: "Hvilken holdegrebsteknik kræves til 2. kyu?", options: ["KATA-GATAME", "TATE-SHIHO-GATAME", "KESA-GATAME", "USHIRO-KESA-GATAME"], answer: 0 },
+      { q: "Hvad betyder UDE-GARAMI?", options: ["Armstræk", "Armsnoning", "Krydskontrol", "Knækontrol"], answer: 1 },
+      { q: "Hvad betyder GARAMI?", options: ["Snoning", "Strække ud", "Kryds", "Kontrol"], answer: 0 },
+      { q: "Hvad betyder UDE?", options: ["Ben", "Arm", "Knæ", "Skulder"], answer: 1 },
+      { q: "Hvad betyder UDE-HISHIGI-UDE-GATAME?", options: ["Armstrakt armkontrol", "Armsnoning", "Armstrakt krydskontrol", "Armstrakt knækontrol"], answer: 0 },
+      { q: "Hvad betyder HISHIGI?", options: ["Snoning", "Strække ud", "Løfte", "Trække"], answer: 1 },
+      { q: "Hvad betyder UDE-HISHIGI-JUJI-GATAME?", options: ["Armstrakt armkontrol", "Armstrakt krydskontrol", "Armsnoning", "Armstrakt knækontrol"], answer: 1 },
+      { q: "Hvad betyder JUJI?", options: ["Kryds", "Knæ", "Arm", "Skulder"], answer: 0 },
+      { q: "Hvad betyder UDE-HISHIGI-HIZA-GATAME?", options: ["Armstrakt krydskontrol", "Armstrakt knækontrol", "Armstrakt armkontrol", "Armsnoning"], answer: 1 },
+      { q: "Hvad betyder HIZA?", options: ["Hofte", "Knæ", "Skulder", "Albue"], answer: 1 },
+      { q: "Hvor mange låseteknikker er nævnt i pensummet til 2. kyu?", options: ["2", "3", "4", "5"], answer: 2 },
+      { q: "Hvilke grundprincipper skal en 2. kyu-elev kende til?", options: ["Grundprincipper i Shime-waza", "Grundprincipper i Kansetsu-waza", "Grundprincipper i Osaekomi-waza", "Grundprincipper i Nage-no-kata"], answer: 1 },
+      { q: "Hvilket forsvar skal en 2. kyu-elev kende til?", options: ["Forsvar mod Kansetsu-waza", "Forsvar mod Shime-waza", "Forsvar mod holdegreb", "Forsvar mod kast"], answer: 0 },
+      { q: "Hvad betyder KANSETSU-WAZA?", options: ["Stranguleringsteknik", "Holdegrebsteknik", "Låseteknik", "Kasteteknik"], answer: 2 },
+      { q: "Hvad er minimumstiden ved 2. kyu ifølge pensummet?", options: ["3 måneder", "4 måneder", "5 måneder", "6 måneder"], answer: 2 },
+      { q: "Hvor mange kasteteknikker er nævnt i pensummet til 2. kyu?", options: ["3", "4", "5", "6"], answer: 2 },
+      { q: "Hvilken af disse teknikker hører IKKE til pensummet for 2. kyu?", options: ["SUKUI-NAGE", "UCHI-MATA", "TOMOE-NAGE", "KATA-GURUMA"], answer: 2 }
+    ]
+  },
+  "1kyu": {
+    label: "1. kyu — Brunt bælte",
+    minTid: "Minimumstid 5 måneder",
+    sourcePages: "11",
+    questions: [
+      { q: "Hvad betyder HIZA-GURUMA?", options: ["Knæhjul", "Skulderhjul", "Hoftehjul", "Cirkelkast"], answer: 0 },
+      { q: "Hvad betyder HIZA?", options: ["Hofte", "Knæ", "Skulder", "Arm"], answer: 1 },
+      { q: "Hvad betyder TOMOE-NAGE?", options: ["Rygsidekast", "Cirkelkast", "Dal lade falde", "Trække ned kontra"], answer: 1 },
+      { q: "Hvad betyder YOKO-TOMOE-NAGE?", options: ["Sideliggende cirkelkast", "Stående cirkelkast", "Omvendt cirkelkast", "Flydende hoftekast"], answer: 0 },
+      { q: "Hvad betyder YOKO?", options: ["Ovenpå", "Side", "Bagfra", "Fremad"], answer: 1 },
+      { q: "Hvad betyder URA-NAGE?", options: ["Rygsidekast", "Øsekast", "Skulderkast", "Inderlårskast"], answer: 0 },
+      { q: "Hvad betyder URA?", options: ["Forside", "Bagside", "Indvendig", "Udvendig"], answer: 1 },
+      { q: "Hvad betyder HIKIKOMI-GAESHI?", options: ["Udvendig omvikling", "Trække ned kontra", "Dal lade falde", "Sideliggende cirkelkast"], answer: 1 },
+      { q: "Hvad betyder HIKI?", options: ["Skubbe", "Trække", "Løfte", "Rulle"], answer: 1 },
+      { q: "Hvad betyder GAESHI (KAESHI)?", options: ["Kontra", "Kast", "Fejning", "Kontrol"], answer: 0 },
+      { q: "Hvad betyder SOTO-MAKIKOMI?", options: ["Indvendig fejning", "Udvendig omvikling", "Rygsidekast", "Skulderhjul"], answer: 1 },
+      { q: "Hvilket ord indgår i SOTO-MAKIKOMI og betyder at rulle?", options: ["Maki", "Soto", "Komi", "Nage"], answer: 0 },
+      { q: "Hvad betyder TANI-OTOSHI?", options: ["Krop lade falde", "Dal lade falde", "Rygsidekast", "Knæhjul"], answer: 1 },
+      { q: "Hvad betyder TANI?", options: ["Bjerg", "Dal", "Bue", "Storm"], answer: 1 },
+      { q: "Hvad betyder OTOSHI?", options: ["Lade falde", "Kaste", "Trække", "Feje"], answer: 0 },
+      { q: "Hvor mange kasteteknikker er nævnt i pensummet til 1. kyu?", options: ["5", "6", "7", "8"], answer: 2 },
+      { q: "Hvor mange vendeteknikker kræves til 1. kyu?", options: ["1", "2", "3", "4"], answer: 2 },
+      { q: "Hvor mange frigørelser kræves til 1. kyu?", options: ["1", "2", "3", "4"], answer: 2 },
+      { q: "Hvilket emne skal en 1. kyu-elev have kendskab til?", options: ["Forståelse af træningsprincipper", "Grundprincipper i Shime-waza", "Dommerregler som listefører", "Faldteknik fra knæ"], answer: 0 },
+      { q: "Hvad er minimumstiden ved 1. kyu ifølge pensummet?", options: ["3 måneder", "4 måneder", "5 måneder", "6 måneder"], answer: 2 },
+      { q: "Hvilken af disse er en kasteteknik til 1. kyu?", options: ["HIZA-GURUMA", "UDE-GARAMI", "KATA-GATAME", "RYO-TE-JIME"], answer: 0 },
+      { q: "Hvilken af disse er en kasteteknik til 1. kyu?", options: ["TOMOE-NAGE", "KESA-GATAME", "KATA-JUJI-JIME", "UDE-HISHIGI-UDE-GATAME"], answer: 0 },
+      { q: "Hvilken teknik er et sideliggende cirkelkast?", options: ["TOMOE-NAGE", "YOKO-TOMOE-NAGE", "URA-NAGE", "TANI-OTOSHI"], answer: 1 },
+      { q: "Hvilken teknik er et rygsidekast?", options: ["URA-NAGE", "HIKIKOMI-GAESHI", "SOTO-MAKIKOMI", "HIZA-GURUMA"], answer: 0 },
+      { q: "Hvilken teknik betyder 'trække ned kontra'?", options: ["TANI-OTOSHI", "HIKIKOMI-GAESHI", "URA-NAGE", "TOMOE-NAGE"], answer: 1 },
+      { q: "Hvilken teknik betyder 'udvendig omvikling'?", options: ["SOTO-MAKIKOMI", "YOKO-TOMOE-NAGE", "TANI-OTOSHI", "HIZA-GURUMA"], answer: 0 },
+      { q: "Hvilken teknik indeholder ordet for knæ?", options: ["HIZA-GURUMA", "URA-NAGE", "TOMOE-NAGE", "SOTO-MAKIKOMI"], answer: 0 },
+      { q: "Hvilken teknik indeholder ordet for dal?", options: ["URA-NAGE", "TANI-OTOSHI", "HIKIKOMI-GAESHI", "YOKO-TOMOE-NAGE"], answer: 1 },
+      { q: "Hvilken teknik indeholder ordet for bagside?", options: ["TANI-OTOSHI", "URA-NAGE", "SOTO-MAKIKOMI", "HIZA-GURUMA"], answer: 1 },
+      { q: "Hvilken af disse teknikker hører IKKE til pensummet for 1. kyu?", options: ["TANI-OTOSHI", "SOTO-MAKIKOMI", "UCHI-MATA", "URA-NAGE"], answer: 2 }
+    ]
+  }
 };
