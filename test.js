@@ -46,6 +46,16 @@ test('nye spørgsmål bruger pensummets præcise formulering ved mulige ordliste
   }
 });
 
+test('ippon-spørgsmålet forklarer både betydning og kampafgørelse', () => {
+  const question = data['3kyu'].questions.find(q => q.q.startsWith('Hvad betyder IPPON,'));
+  assert.ok(question, 'Det uddybede IPPON-spørgsmål mangler');
+  assert.strictEqual(question.q, 'Hvad betyder IPPON, og hvilken betydning har det i en judokamp?');
+  assert.strictEqual(
+    question.options[question.answer],
+    'IPPON betyder ét fuldt point. Det er den højeste score i judo og giver straks sejr, så kampen afsluttes.'
+  );
+});
+
 test('alle spørgsmål har fire unikke svar og gyldigt korrekt svar', () => {
   for (const [belt, level] of Object.entries(data)) {
     if (!level.questions) continue;

@@ -223,7 +223,7 @@ const QUIZ_DATA = {
       { q: "Hvad betyder NAMI i NAMI-JUJI-JIME?", options: ["Omvendt", "Normal", "Halv", "Kryds"], answer: 1 },
       { q: "Hvad betyder GYAKU?", options: ["Normal", "Omvendt eller modsat", "Halv", "Begge hænder"], answer: 1 },
       { q: "Hvad betyder RYOTE?", options: ["En hånd", "To hænder", "Kryds", "Arm"], answer: 1 },
-      { q: "Hvad betyder IPPON?", options: ["Punkt eller point", "En arm", "Skulder", "Kast"], answer: 0 },
+      { q: "Hvad betyder IPPON, og hvilken betydning har det i en judokamp?", options: ["IPPON betyder ét fuldt point. Det er den højeste score i judo og giver straks sejr, så kampen afsluttes.", "IPPON betyder et halvt point, og kampen fortsætter.", "IPPON betyder en advarsel, og kampen fortsætter.", "IPPON betyder, at kampen skal begynde forfra."], answer: 0 },
       { q: "Hvad betyder HARAI (BARAI)?", options: ["Blokering", "Fejning", "Glidende", "Fremad"], answer: 1 },
       { q: "Hvad betyder SASAE?", options: ["Fejning", "Blokering", "Løfte", "Trække"], answer: 1 },
       { q: "Hvad betyder OKURI?", options: ["Fremadgående", "Glidende", "Indvendig", "Fejende"], answer: 1 },
