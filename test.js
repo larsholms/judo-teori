@@ -33,11 +33,23 @@ test('nye spørgsmål bruger pensummets præcise formulering ved mulige ordliste
   assert.strictEqual(blueSeoi.options[blueSeoi.answer], 'Skulderkast (revers)');
   assert.ok(data['2kyu'].questions.some(q => q.q === 'Hvad betyder SUKUI-NAGE?'));
   assert.ok(data['1kyu'].questions.some(q => q.q === 'Hvordan oversættes TOMOE-NAGE på pensumsiden for 1. kyu?'));
+  assert.ok(data['1kyu'].questions.some(q => q.q === 'Hvordan oversættes YOKO-TOMOE-NAGE på pensumsiden for 1. kyu?'));
+  assert.ok(data['1kyu'].questions.some(q => q.q === "Hvilket ordled i SOTO-MAKIKOMI betyder 'rulle' ifølge ordlisten?"));
+  for (const entry of [
+    ['Hvad betyder GURUMA?', 'Hjul'],
+    ['Hvad betyder TOMOE ifølge ordlisten?', 'Bue'],
+    ['Hvad betyder KOMI?', 'Indad']
+  ]) {
+    const question = data['1kyu'].questions.find(q => q.q === entry[0]);
+    assert.ok(question, entry[0] + ' mangler');
+    assert.strictEqual(question.options[question.answer], entry[1]);
+  }
 });
 
 test('alle spørgsmål har fire unikke svar og gyldigt korrekt svar', () => {
   for (const [belt, level] of Object.entries(data)) {
     if (!level.questions) continue;
+    assert.strictEqual(new Set(level.questions.map(q => q.q)).size, level.questions.length, `${belt}: spørgsmål skal være unikke`);
     for (const [i, q] of level.questions.entries()) {
       assert.strictEqual(q.options.length, 4, `${belt} spørgsmål ${i + 1}`);
       assert.strictEqual(new Set(q.options).size, 4, `${belt} spørgsmål ${i + 1} har dubletter`);
