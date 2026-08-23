@@ -42,7 +42,7 @@ Det matcher den officielle kilde. Voksne kan godt bruge appen, men deres graduer
 ### 5. Privatliv og sikkerhed
 
 - Bevar første lancering uden konti, tracking og cookies. Det minimerer sikkerheds- og GDPR-arbejdet.
-- Tilføj en kort privatlivsside, som forklarer, at appen ikke indsamler personoplysninger.
+- Privatlivsside tilføjet 23. august 2026; den forklarer, at appen ikke bruger konti, cookies, sporing eller analyseværktøjer.
 - Tilføj en restriktiv Content Security Policy og relevante sikkerhedsmeta-oplysninger, hvor GitHub Pages tillader det.
 - Kør `npm audit`, automatiske tests og live tilgængelighedstest før hver udgivelse.
 - Undgå tredjepartsanalyse i første version. Hvis analyse senere tilføjes, skal privatliv, databehandler og eventuelt samtykke vurderes først.
@@ -60,12 +60,12 @@ Et egentligt webformularsystem kan tilføjes senere. Det kræver en backend elle
 
 ### 7. Kvalitet og drift
 
-- Kør CI automatisk ved hvert push.
+- CI kører automatisk data-, browser- og axe-tests ved hvert push og pull request.
 - Test alle fem bælter med tastatur og mindst NVDA/Firefox eller Chrome samt VoiceOver/Safari.
 - Test mobilvisning og langsom forbindelse.
 - Bevar kildefiler, pensumreference og versionshistorik i Git.
 - Dokumentér, hvordan spørgsmål opdateres, når Judo Danmark ændrer pensummet.
-- Tilføj en synlig versions- eller opdateringsdato i appen.
+- Appen viser en synlig opdateringsdato.
 
 ## Kan komme efter første lancering
 
