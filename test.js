@@ -27,6 +27,14 @@ test('blåt og brunt bælte har sporbar kilde til det officielle pensum', () => 
   assert.strictEqual(data['1kyu'].sourcePages, '11');
 });
 
+test('nye spørgsmål bruger pensummets præcise formulering ved mulige ordlistekonflikter', () => {
+  const blueSeoi = data['2kyu'].questions.find(q => q.q === 'Hvordan oversættes SEOI-NAGE (ERI) i pensummet?');
+  assert.ok(blueSeoi, 'præciseret SEOI-NAGE (ERI)-spørgsmål mangler');
+  assert.strictEqual(blueSeoi.options[blueSeoi.answer], 'Skulderkast (revers)');
+  assert.ok(data['2kyu'].questions.some(q => q.q === 'Hvad betyder SUKUI-NAGE?'));
+  assert.ok(data['1kyu'].questions.some(q => q.q === 'Hvordan oversættes TOMOE-NAGE på pensumsiden for 1. kyu?'));
+});
+
 test('alle spørgsmål har fire unikke svar og gyldigt korrekt svar', () => {
   for (const [belt, level] of Object.entries(data)) {
     if (!level.questions) continue;

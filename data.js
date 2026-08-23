@@ -236,12 +236,12 @@ const QUIZ_DATA = {
     minTid: "Minimumstid 5 måneder",
     sourcePages: "9-10",
     questions: [
-      { q: "Hvad betyder SEOI-NAGE (ERI)?", options: ["Skulderkast i revers", "Skulderhjul", "Øsekast", "Inderlårskast"], answer: 0 },
+      { q: "Hvordan oversættes SEOI-NAGE (ERI) i pensummet?", options: ["Skulderkast (revers)", "Skulderhjul", "Øsekast", "Inderlårskast"], answer: 0 },
       { q: "Hvad betyder ERI?", options: ["Skulder", "Krave eller revers", "Arm", "Knæ"], answer: 1 },
       { q: "Hvad betyder KATA-GURUMA?", options: ["Knæhjul", "Skulderhjul", "Hoftehjul", "Kropsdrejning"], answer: 1 },
       { q: "Hvad kan KATA betyde i KATA-GURUMA?", options: ["Skulder", "Hofte", "Knæ", "Arm"], answer: 0 },
       { q: "Hvad betyder GURUMA?", options: ["Kontrol", "Hjul", "Kast", "Snoning"], answer: 1 },
-      { q: "Hvilken kasteteknik er SUKUI-NAGE?", options: ["Øsekast", "Skulderkast", "Cirkelkast", "Rygsidekast"], answer: 0 },
+      { q: "Hvad betyder SUKUI-NAGE?", options: ["Øsekast", "Skulderkast", "Cirkelkast", "Rygsidekast"], answer: 0 },
       { q: "Hvad betyder TSURIKOMI-GOSHI?", options: ["Flydende hofte", "Fejende hofte", "Løfte trække hofte", "Stor hofte"], answer: 2 },
       { q: "Hvad betyder TSURIKOMI?", options: ["Løfte op og trække ned", "Feje udvendigt", "Rulle fremad", "Lade falde"], answer: 0 },
       { q: "Hvad betyder GOSHI (KOSHI)?", options: ["Arm", "Skulder", "Hofte", "Ben"], answer: 2 },
@@ -275,7 +275,7 @@ const QUIZ_DATA = {
     questions: [
       { q: "Hvad betyder HIZA-GURUMA?", options: ["Knæhjul", "Skulderhjul", "Hoftehjul", "Cirkelkast"], answer: 0 },
       { q: "Hvad betyder HIZA?", options: ["Hofte", "Knæ", "Skulder", "Arm"], answer: 1 },
-      { q: "Hvad betyder TOMOE-NAGE?", options: ["Rygsidekast", "Cirkelkast", "Dal lade falde", "Trække ned kontra"], answer: 1 },
+      { q: "Hvordan oversættes TOMOE-NAGE på pensumsiden for 1. kyu?", options: ["Rygsidekast", "Cirkelkast", "Dal lade falde", "Trække ned kontra"], answer: 1 },
       { q: "Hvad betyder YOKO-TOMOE-NAGE?", options: ["Sideliggende cirkelkast", "Stående cirkelkast", "Omvendt cirkelkast", "Flydende hoftekast"], answer: 0 },
       { q: "Hvad betyder YOKO?", options: ["Ovenpå", "Side", "Bagfra", "Fremad"], answer: 1 },
       { q: "Hvad betyder URA-NAGE?", options: ["Rygsidekast", "Øsekast", "Skulderkast", "Inderlårskast"], answer: 0 },
