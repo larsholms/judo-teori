@@ -74,6 +74,20 @@ test('appen oplyser målgruppe, kilde og uafhængig status', () => {
   assert.match(html, /uafhængigt træningsværktøj/i);
 });
 
+test('appen har en restriktiv sikkerhedspolitik og referrer-politik', () => {
+  assert.match(html, /http-equiv="Content-Security-Policy"/i);
+  assert.match(html, /default-src 'self'/i);
+  assert.match(html, /object-src 'none'/i);
+  assert.match(html, /base-uri 'none'/i);
+  assert.match(html, /connect-src 'none'/i);
+  assert.match(html, /name="referrer" content="strict-origin-when-cross-origin"/i);
+
+  const privacyHtml = fs.readFileSync('privatliv.html', 'utf8');
+  assert.match(privacyHtml, /http-equiv="Content-Security-Policy"/i);
+  assert.match(privacyHtml, /script-src 'none'/i);
+  assert.match(privacyHtml, /name="referrer" content="strict-origin-when-cross-origin"/i);
+});
+
 test('forkert svar annoncerer selve det korrekte svar for skærmlæser', () => {
   assert.ok(html.includes('feedback.textContent = "Forkert. Det rigtige svar er " + correctAnswer + "."'));
   assert.match(html, /role="status" aria-live="assertive"/);
