@@ -66,6 +66,20 @@ assert.match(document.getElementById('feedback').textContent, /^Rigtigt! Det kor
 assert.ok(correct.querySelector('.correct-icon'));
 assert.strictEqual(oscillatorStarts - startsBeforeCorrect, 3, 'Rigtigtlyden skal have tre pling-toner');
 
+// Feedbacklydene kan slås fra; tekst og ikon virker fortsat.
+const soundToggle = document.getElementById('sound-toggle');
+soundToggle.click();
+assert.strictEqual(soundToggle.textContent, 'Lyd: fra');
+assert.strictEqual(soundToggle.getAttribute('aria-pressed'), 'true');
+selectBelt('5. kyu');
+buttons = [...document.querySelectorAll('#answer-buttons button')];
+correct = buttons.find(b => b.dataset.correct === 'true');
+const startsBeforeMutedAnswer = oscillatorStarts;
+correct.click();
+assert.match(document.getElementById('feedback').textContent, /^Rigtigt! Det korrekte svar er /);
+assert.ok(correct.querySelector('.correct-icon'));
+assert.strictEqual(oscillatorStarts, startsBeforeMutedAnswer, 'Ingen lyd må starte, når lyd er slået fra');
+
 // Blåt og brunt er tilgængelige og starter hver sin quiz med 30 spørgsmål.
 for (const label of ['2. kyu', '1. kyu']) {
   selectBelt(label);
@@ -73,4 +87,4 @@ for (const label of ['2. kyu', '1. kyu']) {
   assert.match(document.getElementById('question-num').textContent, /af 30/);
 }
 
-console.log('✓ browseradfærd: alle fem bælter, feedback, ikoner, aria-labels og lyde');
+console.log('✓ browseradfærd: alle fem bælter, feedback, ikoner, aria-labels og valgfri lyde');

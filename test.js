@@ -109,6 +109,12 @@ test('Web Audio bruges til særskilte rigtigt- og forkertlyde', () => {
   assert.match(html, /AudioContext/);
 });
 
+test('brugeren kan slå feedbacklyde fra uden at miste den visuelle feedback', () => {
+  assert.match(html, /id="sound-toggle"[^>]*aria-pressed="false"/);
+  assert.match(html, /soundEnabled = !soundEnabled/);
+  assert.match(html, /if \(!soundEnabled\) return/);
+});
+
 test('feedbackfarver har mindst WCAG AA-kontrast mod panelet', () => {
   function luminance(hex) {
     const rgb = hex.match(/[0-9a-f]{2}/gi).map(v => parseInt(v, 16) / 255);

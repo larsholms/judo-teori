@@ -44,6 +44,7 @@ Det matcher den officielle kilde. Voksne kan godt bruge appen, men deres graduer
 - Bevar første lancering uden konti, tracking og cookies. Det minimerer sikkerheds- og GDPR-arbejdet.
 - Privatlivsside tilføjet 23. august 2026; den forklarer, at appen ikke bruger konti, cookies, sporing eller analyseværktøjer.
 - Restriktiv Content Security Policy og referrer-politik er tilføjet som meta-oplysninger 24. august 2026. Politikken spærrer blandt andet eksterne forbindelser, objekter, formularindsendelse og ændring af base-URL; inline CSS og appens nuværende inline JavaScript er fortsat tilladt.
+- Brugeren kan slå feedbacklydene fra; tekst, ikoner og skærmlæserfeedback fungerer uafhængigt af lyd.
 - Kør `npm audit`, automatiske tests og live tilgængelighedstest før hver udgivelse.
 - Undgå tredjepartsanalyse i første version. Hvis analyse senere tilføjes, skal privatliv, databehandler og eventuelt samtykke vurderes først.
 

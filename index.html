@@ -53,6 +53,8 @@
     outline-offset: 2px;
   }
   button:disabled { cursor: default; opacity: 0.9; }
+  .settings { margin-bottom: 1rem; }
+  .settings button { width: auto; margin-bottom: 0; }
   button.correct { border-color: var(--correct); background: rgba(60,163,92,0.25); }
   button.wrong { border-color: var(--wrong); background: rgba(201,69,59,0.25); }
   .answer-icon { display: inline-block; width: 1.5em; font-weight: bold; }
@@ -82,6 +84,10 @@
 </header>
 
 <main id="main">
+
+  <div class="settings">
+    <button id="sound-toggle" type="button" aria-pressed="false">Lyd: til</button>
+  </div>
 
   <section id="belt-select" class="panel" aria-labelledby="belt-heading">
     <h2 id="belt-heading">Vælg bælte du træner til</h2>
@@ -128,6 +134,7 @@
   const scoreSummary = document.getElementById("score-summary");
   const restartBtn = document.getElementById("restart-btn");
   const backBtn = document.getElementById("back-btn");
+  const soundToggle = document.getElementById("sound-toggle");
 
   let currentBeltKey = null;
   let questions = [];
@@ -135,6 +142,7 @@
   let score = 0;
   let answered = false;
   let audioContext = null;
+  let soundEnabled = true;
 
   function getAudioContext() {
     if (!audioContext) {
@@ -160,6 +168,7 @@
   }
 
   function playCorrectSound() {
+    if (!soundEnabled) return;
     const ctx = getAudioContext();
     if (!ctx) return;
     const now = ctx.currentTime;
@@ -169,6 +178,7 @@
   }
 
   function playWrongSound() {
+    if (!soundEnabled) return;
     const ctx = getAudioContext();
     if (!ctx) return;
     const now = ctx.currentTime;
@@ -192,6 +202,12 @@
     button.prepend(icon);
     button.setAttribute("aria-label", ariaLabel + ": " + button.dataset.answerText);
   }
+
+  soundToggle.addEventListener("click", function () {
+    soundEnabled = !soundEnabled;
+    soundToggle.textContent = soundEnabled ? "Lyd: til" : "Lyd: fra";
+    soundToggle.setAttribute("aria-pressed", String(!soundEnabled));
+  });
 
   function shuffle(arr) {
     const a = arr.slice();
