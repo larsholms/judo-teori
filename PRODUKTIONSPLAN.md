@@ -27,7 +27,7 @@ Det matcher den officielle kilde. Voksne kan godt bruge appen, men deres graduer
 
 ### 3. Rettigheder og afsender
 
-- Krediter Judo Danmark som kilde med dokumenttitel og opdateringsdato.
+- Judo Danmark krediteres nu som kilde med dokumenttitel og opdateringsdato.
 - Gør det klart, at appen er uafhængig og ikke en officiel Judo Danmark-app.
 - Afklar med Judo Danmark, om brugen og bearbejdningen af deres ophavsretligt beskyttede pensum kan godkendes, især før markedsføring eller monetisering.
 - Tilføj kontaktoplysninger og en kort ansvarstekst.
@@ -65,7 +65,7 @@ Et egentligt webformularsystem kan tilføjes senere. Det kræver en backend elle
 - Test alle fem bælter med tastatur og mindst NVDA/Firefox eller Chrome samt VoiceOver/Safari.
 - Test mobilvisning og langsom forbindelse.
 - Bevar kildefiler, pensumreference og versionshistorik i Git.
-- Dokumentér, hvordan spørgsmål opdateres, når Judo Danmark ændrer pensummet.
+- Vedligeholdelses- og udgivelsesflowet for spørgsmål er dokumenteret i `README.md`.
 - Appen viser en synlig opdateringsdato.
 
 ## Kan komme efter første lancering
@@ -104,7 +104,7 @@ Første markedsføringsindsats bør være lille og målbar:
 
 1. Udgiv versionen med blåt og brunt bælte.
 2. Indhent Lars' test og faglig stikprøve.
-3. Tilføj kilde-, målgruppe- og kontakttekst.
+3. Tilføj kontakttekst, når den dedikerede feedbackadresse er valgt. Kilde- og målgruppeteksten er på plads.
 4. Afklar Judo Danmarks tilladelse.
 5. Køb og forbind domænet.
 6. Lancér den første offentlige version uden tracking og betaling.

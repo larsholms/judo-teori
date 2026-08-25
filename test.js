@@ -71,7 +71,17 @@ test('alle spørgsmål har fire unikke svar og gyldigt korrekt svar', () => {
 test('appen oplyser målgruppe, kilde og uafhængig status', () => {
   assert.match(html, /børn og unge \(6-14 år\)/i);
   assert.match(html, /https:\/\/www\.judo\.dk\/for-klubberne\/pensum/);
+  assert.match(html, /Gradueringspensum børn og ungdom 6-14 år/);
+  assert.match(html, /opdateret februar 2024/);
   assert.match(html, /uafhængigt træningsværktøj/i);
+});
+
+test('repoet dokumenterer vedligeholdelse og udgivelse af spørgsmål', () => {
+  const readme = fs.readFileSync('README.md', 'utf8');
+  assert.match(readme, /Opdatering af spørgsmål/);
+  assert.match(readme, /npm test/);
+  assert.match(readme, /sourcePages/);
+  assert.match(readme, /Judo Danmark/);
 });
 
 test('appen har en restriktiv sikkerhedspolitik og referrer-politik', () => {
