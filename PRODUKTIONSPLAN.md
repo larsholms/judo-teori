@@ -29,7 +29,7 @@ Det matcher den officielle kilde. Voksne kan godt bruge appen, men deres graduer
 
 - Judo Danmark krediteres nu som kilde med dokumenttitel og opdateringsdato.
 - Gør det klart, at appen er uafhængig og ikke en officiel Judo Danmark-app.
-- Afklar med Judo Danmark, om brugen og bearbejdningen af deres ophavsretligt beskyttede pensum kan godkendes, især før markedsføring eller monetisering.
+- Afklar med Judo Danmark, om brugen og bearbejdningen af deres ophavsretligt beskyttede pensum kan godkendes, især før markedsføring eller monetisering. En konkret beskrivelse, et afsendelsesklart henvendelsesudkast og en svar-checkliste ligger i `RETTIGHEDSAFKLARING.md`.
 - Tilføj kontaktoplysninger og en kort ansvarstekst.
 
 ### 4. Domæne og hosting
