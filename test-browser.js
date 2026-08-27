@@ -30,6 +30,14 @@ const dom = new JSDOM(html, {
 });
 const document = dom.window.document;
 
+// Starten forklarer forløbet, før brugeren vælger niveau.
+assert.strictEqual(document.getElementById('intro-area').hidden, false);
+assert.strictEqual(document.getElementById('belt-select').hidden, true);
+document.getElementById('start-btn').click();
+assert.strictEqual(document.getElementById('intro-area').hidden, true);
+assert.strictEqual(document.getElementById('belt-select').hidden, false);
+assert.strictEqual(document.activeElement.id, 'belt-heading');
+
 function selectBelt(labelStart) {
   document.getElementById('back-btn').click();
   const button = [...document.querySelectorAll('.belt-btn')].find(b => b.textContent.startsWith(labelStart));
@@ -40,6 +48,8 @@ function selectBelt(labelStart) {
 // Orange er tilgængeligt og starter en quiz.
 selectBelt('4. kyu');
 assert.match(document.getElementById('question-num').textContent, /4\. kyu/);
+assert.strictEqual(document.getElementById('quiz-progress').value, 1);
+assert.strictEqual(document.getElementById('quiz-progress').max, 30);
 
 // Forkert svar: eksakt korrekt svar annonceres, ikoner og aria-labels sættes, sur lyd spilles.
 let buttons = [...document.querySelectorAll('#answer-buttons button')];
@@ -87,4 +97,10 @@ for (const label of ['2. kyu', '1. kyu']) {
   assert.match(document.getElementById('question-num').textContent, /af 30/);
 }
 
-console.log('✓ browseradfærd: alle fem bælter, feedback, ikoner, aria-labels og valgfri lyde');
+// Brugeren kan forlade et quizforløb og vende tydeligt tilbage til niveauvalget.
+document.getElementById('quit-btn').click();
+assert.strictEqual(document.getElementById('quiz-area').hidden, true);
+assert.strictEqual(document.getElementById('belt-select').hidden, false);
+assert.strictEqual(document.activeElement.id, 'belt-heading');
+
+console.log('✓ browseradfærd: sammenhængende brugerrejse, alle fem bælter, feedback og valgfri lyde');

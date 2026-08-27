@@ -76,6 +76,15 @@ test('appen oplyser målgruppe, kilde og uafhængig status', () => {
   assert.match(html, /uafhængigt træningsværktøj/i);
 });
 
+test('appen har en tydelig start, fremdrift og afslutning på træningen', () => {
+  assert.match(html, /id="intro-area"/);
+  assert.match(html, /id="start-btn"/);
+  assert.match(html, /id="quiz-progress"/);
+  assert.match(html, /id="quit-btn"/);
+  assert.match(html, /id="result-message"/);
+  assert.match(html, /id="home-btn"/);
+});
+
 test('repoet dokumenterer vedligeholdelse og udgivelse af spørgsmål', () => {
   const readme = fs.readFileSync('README.md', 'utf8');
   assert.match(readme, /Opdatering af spørgsmål/);

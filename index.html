@@ -67,6 +67,10 @@
   #feedback.wrong-text { color: var(--wrong); }
   #next-btn { border-color: var(--accent); background: var(--accent); color: #1a1a1a; font-weight: bold; }
   #score-summary { font-size: 1.2rem; }
+  #start-btn { background: var(--accent); color: #1a1a1a; font-weight: bold; }
+  #quiz-progress { width: 100%; accent-color: var(--accent); }
+  .steps { padding-left: 1.4rem; }
+  .secondary { border-color: #9da5b2; }
   a, a:visited { color: var(--accent); }
   .skip-link {
     position: absolute; left: -9999px; top: 0;
@@ -89,31 +93,48 @@
     <button id="sound-toggle" type="button" aria-pressed="false">Lyd: til</button>
   </div>
 
-  <section id="belt-select" class="panel" aria-labelledby="belt-heading">
+  <section id="intro-area" class="panel" aria-labelledby="intro-heading">
+    <h2 id="intro-heading">Klar til at træne?</h2>
+    <p>Du træner ét bælteniveau ad gangen og får straks at vide, om dit svar er rigtigt.</p>
+    <ol class="steps">
+      <li>Vælg det bælte, du træner til.</li>
+      <li>Svar på 30 spørgsmål i dit eget tempo.</li>
+      <li>Se dit resultat, og vælg om du vil prøve igen.</li>
+    </ol>
+    <button id="start-btn" type="button">Start træning</button>
+  </section>
+
+  <section id="belt-select" class="panel" aria-labelledby="belt-heading" hidden>
     <h2 id="belt-heading">Vælg bælte du træner til</h2>
+    <p>Vælg det niveau, du øver dig til. Hver træning har 30 spørgsmål.</p>
     <div id="belt-buttons" role="group" aria-label="Vælg bælteniveau"></div>
+    <button id="belt-home-btn" class="secondary" type="button">Til forsiden</button>
   </section>
 
   <section id="quiz-area" class="panel" hidden>
     <p id="question-num"></p>
+    <progress id="quiz-progress" value="1" max="30" aria-label="Fremdrift i træningen"></progress>
     <h2 id="question-text"></h2>
     <div id="answer-buttons" role="group" aria-label="Svarmuligheder"></div>
     <p id="feedback" role="status" aria-live="assertive"></p>
     <button id="next-btn" hidden>Næste spørgsmål</button>
+    <button id="quit-btn" class="secondary" type="button">Stop og vælg bælte</button>
   </section>
 
   <section id="result-area" class="panel" hidden aria-live="polite">
     <h2>Resultat</h2>
     <p id="score-summary"></p>
-    <button id="restart-btn">Prøv igen</button>
-    <button id="back-btn">Vælg andet bælte</button>
+    <p id="result-message"></p>
+    <button id="restart-btn">Træn samme bælte igen</button>
+    <button id="back-btn">Vælg et andet bælte</button>
+    <button id="home-btn" class="secondary" type="button">Afslut og gå til forsiden</button>
   </section>
 
   <p>Dette er et uafhængigt træningsværktøj og ikke en officiel Judo Danmark-app. Kontrollér altid kravene med din træner.</p>
   <p>Kilde: Judo Danmark, <a href="https://www.judo.dk/for-klubberne/pensum"><cite>Gradueringspensum børn og ungdom 6-14 år</cite></a>, opdateret februar 2024.</p>
   <p><a href="privatliv.html">Privatliv</a> — appen bruger hverken cookies, sporing eller brugerkonti.</p>
   <p><a href="https://github.com/larsholms/judo-teori">Se koden på GitHub</a></p>
-  <p><small>Senest opdateret: 25. august 2026</small></p>
+  <p><small>Senest opdateret: 27. august 2026</small></p>
 
 </main>
 
@@ -122,18 +143,26 @@
 (function () {
   "use strict";
 
+  const introArea = document.getElementById("intro-area");
+  const startBtn = document.getElementById("start-btn");
   const beltSelect = document.getElementById("belt-select");
+  const beltHeading = document.getElementById("belt-heading");
   const beltButtons = document.getElementById("belt-buttons");
+  const beltHomeBtn = document.getElementById("belt-home-btn");
   const quizArea = document.getElementById("quiz-area");
   const resultArea = document.getElementById("result-area");
   const questionNum = document.getElementById("question-num");
+  const quizProgress = document.getElementById("quiz-progress");
   const questionText = document.getElementById("question-text");
   const answerButtons = document.getElementById("answer-buttons");
   const feedback = document.getElementById("feedback");
   const nextBtn = document.getElementById("next-btn");
+  const quitBtn = document.getElementById("quit-btn");
   const scoreSummary = document.getElementById("score-summary");
+  const resultMessage = document.getElementById("result-message");
   const restartBtn = document.getElementById("restart-btn");
   const backBtn = document.getElementById("back-btn");
+  const homeBtn = document.getElementById("home-btn");
   const soundToggle = document.getElementById("sound-toggle");
 
   let currentBeltKey = null;
@@ -209,6 +238,26 @@
     soundToggle.setAttribute("aria-pressed", String(!soundEnabled));
   });
 
+  function showIntro() {
+    quizArea.hidden = true;
+    resultArea.hidden = true;
+    beltSelect.hidden = true;
+    introArea.hidden = false;
+    startBtn.focus();
+  }
+
+  function showBeltSelect() {
+    introArea.hidden = true;
+    quizArea.hidden = true;
+    resultArea.hidden = true;
+    beltSelect.hidden = false;
+    beltHeading.setAttribute("tabindex", "-1");
+    beltHeading.focus();
+  }
+
+  startBtn.addEventListener("click", showBeltSelect);
+  beltHomeBtn.addEventListener("click", showIntro);
+
   function shuffle(arr) {
     const a = arr.slice();
     for (let i = a.length - 1; i > 0; i--) {
@@ -242,6 +291,7 @@
     questions = shuffle(QUIZ_DATA[key].questions);
     currentIndex = 0;
     score = 0;
+    introArea.hidden = true;
     beltSelect.hidden = true;
     resultArea.hidden = true;
     quizArea.hidden = false;
@@ -254,6 +304,8 @@
     feedback.className = "";
     nextBtn.hidden = true;
     const q = questions[currentIndex];
+    quizProgress.max = questions.length;
+    quizProgress.value = currentIndex + 1;
     questionNum.textContent = "Spørgsmål " + (currentIndex + 1) + " af " + questions.length + " — " + QUIZ_DATA[currentBeltKey].label;
     questionText.textContent = q.q;
     answerButtons.innerHTML = "";
@@ -318,16 +370,21 @@
     resultArea.hidden = false;
     const pct = Math.round((score / questions.length) * 100);
     scoreSummary.textContent = "Du fik " + score + " ud af " + questions.length + " rigtige (" + pct + "%).";
+    if (pct >= 90) {
+      resultMessage.textContent = "Flot trænet — du har rigtig godt styr på teorien. Tal med din træner om, hvad du skal øve videre.";
+    } else if (pct >= 70) {
+      resultMessage.textContent = "Godt på vej. Prøv igen og læg mærke til de svar, du er i tvivl om.";
+    } else {
+      resultMessage.textContent = "God træning. Tag gerne en ny runde i dit eget tempo — hvert forsøg hjælper.";
+    }
     scoreSummary.setAttribute("tabindex", "-1");
     scoreSummary.focus();
   }
 
   restartBtn.addEventListener("click", function () { startQuiz(currentBeltKey); });
-  backBtn.addEventListener("click", function () {
-    resultArea.hidden = true;
-    beltSelect.hidden = false;
-    beltButtons.querySelector("button").focus();
-  });
+  backBtn.addEventListener("click", showBeltSelect);
+  quitBtn.addEventListener("click", showBeltSelect);
+  homeBtn.addEventListener("click", showIntro);
 
   renderBeltButtons();
 })();
