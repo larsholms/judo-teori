@@ -34,5 +34,39 @@ function assertNoViolations(results, state) {
   wrongAnswer.click();
 
   assertNoViolations(await dom.window.axe.run(dom.window.document, axeOptions), 'efter forkert svar');
-  console.log('✓ axe: ingen automatiske tilgængelighedsbrud før eller efter svar');
+
+  // Spil passet færdigt, så resultatsiden vises med en fejloversigt.
+  const document_ = dom.window.document;
+  const total = document_.getElementById('quiz-progress').max;
+  for (let i = 0; i < total; i++) {
+    if (i > 0) {
+      [...document_.querySelectorAll('#answer-buttons button')]
+        .find(button => button.dataset.correct === (i === 1 ? 'false' : 'true')).click();
+    }
+    document_.getElementById('next-btn').click();
+  }
+  if (document_.getElementById('result-area').hidden) {
+    console.error('resultatsiden blev ikke vist');
+    process.exit(1);
+  }
+  if (!document_.querySelectorAll('#mistake-list li').length) {
+    console.error('resultatsiden mangler fejloversigten');
+    process.exit(1);
+  }
+  assertNoViolations(await dom.window.axe.run(document_, axeOptions), 'resultatside med fejloversigt');
+
+  // Et fejlfrit pas viser beskeden om ingen fejl i stedet.
+  document_.getElementById('restart-btn').click();
+  for (let i = 0; i < total; i++) {
+    [...document_.querySelectorAll('#answer-buttons button')]
+      .find(button => button.dataset.correct === 'true').click();
+    document_.getElementById('next-btn').click();
+  }
+  if (document_.getElementById('no-mistakes-message').hidden) {
+    console.error('beskeden om ingen fejl blev ikke vist');
+    process.exit(1);
+  }
+  assertNoViolations(await dom.window.axe.run(document_, axeOptions), 'resultatside uden fejl');
+
+  console.log('✓ axe: ingen automatiske tilgængelighedsbrud på start, efter svar og på resultatsiden med og uden fejloversigt');
 })().catch(err => { console.error(err); process.exit(1); });

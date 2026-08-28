@@ -74,6 +74,11 @@
   #start-btn { background: var(--accent); color: #1a1a1a; font-weight: bold; }
   #quiz-progress { width: 100%; accent-color: var(--accent); }
   .steps { padding-left: 1.4rem; }
+  #mistake-review h3 { font-size: 1.05rem; margin-bottom: 0.4rem; }
+  #mistake-list { padding-left: 1.3rem; }
+  #mistake-list li { margin-bottom: 0.8rem; }
+  #mistake-list p { margin: 0.1rem 0; }
+  #mistake-list li p:first-child { font-weight: bold; }
   .secondary { border-color: #9da5b2; }
   a, a:visited { color: var(--accent); }
   .skip-link {
@@ -131,10 +136,15 @@
     <button id="quit-btn" class="secondary" type="button">Stop og vælg bælte</button>
   </section>
 
-  <section id="result-area" class="panel" hidden aria-live="polite">
+  <section id="result-area" class="panel" hidden>
     <h2>Resultat</h2>
     <p id="score-summary"></p>
     <p id="result-message"></p>
+    <div id="mistake-review" hidden>
+      <h3>Spørgsmål du svarede forkert på</h3>
+      <ul id="mistake-list"></ul>
+    </div>
+    <p id="no-mistakes-message" hidden>Ingen fejl — du svarede rigtigt på alle spørgsmål.</p>
     <button id="restart-btn">Træn samme bælte igen</button>
     <button id="back-btn">Vælg et andet bælte</button>
     <button id="home-btn" class="secondary" type="button">Afslut og gå til forsiden</button>
@@ -171,6 +181,9 @@
   const quitBtn = document.getElementById("quit-btn");
   const scoreSummary = document.getElementById("score-summary");
   const resultMessage = document.getElementById("result-message");
+  const mistakeReview = document.getElementById("mistake-review");
+  const mistakeList = document.getElementById("mistake-list");
+  const noMistakesMessage = document.getElementById("no-mistakes-message");
   const restartBtn = document.getElementById("restart-btn");
   const backBtn = document.getElementById("back-btn");
   const homeBtn = document.getElementById("home-btn");
@@ -181,6 +194,7 @@
   let currentIndex = 0;
   let score = 0;
   let answered = false;
+  let mistakes = [];
   let audioContext = null;
   let soundEnabled = true;
 
@@ -249,6 +263,13 @@
     soundToggle.setAttribute("aria-pressed", String(!soundEnabled));
   });
 
+  function clearMistakeReview() {
+    mistakes = [];
+    mistakeList.innerHTML = "";
+    mistakeReview.hidden = true;
+    noMistakesMessage.hidden = true;
+  }
+
   function showIntro() {
     quizArea.hidden = true;
     resultArea.hidden = true;
@@ -258,6 +279,7 @@
   }
 
   function showBeltSelect() {
+    clearMistakeReview();
     introArea.hidden = true;
     quizArea.hidden = true;
     resultArea.hidden = true;
@@ -303,6 +325,7 @@
     questions = shuffle(QUIZ_DATA[key].questions).slice(0, selectedLength);
     currentIndex = 0;
     score = 0;
+    clearMistakeReview();
     introArea.hidden = true;
     beltSelect.hidden = true;
     resultArea.hidden = true;
@@ -354,6 +377,11 @@
       btn.classList.add("wrong");
       addAnswerIcon(btn, "✗", "wrong-icon", "Forkert svar");
       const correctAnswer = questions[currentIndex].options[questions[currentIndex].answer];
+      mistakes.push({
+        question: questions[currentIndex].q,
+        chosen: btn.dataset.answerText,
+        correct: correctAnswer
+      });
       feedback.textContent = "Forkert. Det rigtige svar er " + correctAnswer + ".";
       feedback.className = "wrong-text";
       allButtons.forEach(function (b) {
@@ -377,8 +405,25 @@
     }
   });
 
+  function renderMistakes() {
+    mistakeReview.hidden = mistakes.length === 0;
+    noMistakesMessage.hidden = mistakes.length > 0;
+    mistakes.forEach(function (mistake) {
+      const item = document.createElement("li");
+      const question = document.createElement("p");
+      question.textContent = mistake.question;
+      const chosen = document.createElement("p");
+      chosen.textContent = "Dit svar: " + mistake.chosen;
+      const correct = document.createElement("p");
+      correct.textContent = "Rigtigt svar: " + mistake.correct;
+      item.append(question, chosen, correct);
+      mistakeList.appendChild(item);
+    });
+  }
+
   function showResult() {
     quizArea.hidden = true;
+    renderMistakes();
     resultArea.hidden = false;
     const pct = Math.round((score / questions.length) * 100);
     scoreSummary.textContent = "Du fik " + score + " ud af " + questions.length + " rigtige (" + pct + "%).";

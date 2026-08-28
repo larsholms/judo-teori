@@ -107,4 +107,98 @@ assert.strictEqual(document.getElementById('quiz-area').hidden, true);
 assert.strictEqual(document.getElementById('belt-select').hidden, false);
 assert.strictEqual(document.activeElement.id, 'belt-heading');
 
+// Gennemfører et helt pas og returnerer de forventede fejl i rækkefølge.
+function runPass(labelStart, isWrongAnswer) {
+  selectBelt(labelStart);
+  const expectedMistakes = [];
+  const total = document.getElementById('quiz-progress').max;
+  for (let i = 0; i < total; i++) {
+    const options = [...document.querySelectorAll('#answer-buttons button')];
+    const questionAsked = document.getElementById('question-text').textContent;
+    const rightOption = options.find(b => b.dataset.correct === 'true');
+    const wrongOption = options.find(b => b.dataset.correct === 'false');
+    if (isWrongAnswer(i)) {
+      expectedMistakes.push({
+        question: questionAsked,
+        chosen: wrongOption.dataset.answerText,
+        correct: rightOption.dataset.answerText
+      });
+      wrongOption.click();
+    } else {
+      rightOption.click();
+    }
+    document.getElementById('next-btn').click();
+  }
+  return expectedMistakes;
+}
+
+// Resultatsiden viser kun de forkert besvarede spørgsmål med både eget og korrekt svar.
+document.querySelector('input[name="training-length"][value="10"]').checked = true;
+const mistakes = runPass('5. kyu', i => i % 3 === 0);
+assert.strictEqual(document.getElementById('result-area').hidden, false);
+const mistakeItems = [...document.querySelectorAll('#mistake-list li')];
+assert.strictEqual(mistakeItems.length, mistakes.length, 'fejloversigten skal vise præcis de forkerte svar');
+mistakes.forEach((mistake, i) => {
+  const text = mistakeItems[i].textContent;
+  assert.ok(text.includes(mistake.question), 'fejl ' + (i + 1) + ' mangler spørgsmålet');
+  assert.ok(text.includes('Dit svar: ' + mistake.chosen), 'fejl ' + (i + 1) + ' mangler brugerens svar');
+  assert.ok(text.includes('Rigtigt svar: ' + mistake.correct), 'fejl ' + (i + 1) + ' mangler det rigtige svar');
+});
+assert.match(document.querySelector('#mistake-review h3').textContent, /forkert/i);
+
+// Et fejlfrit pas viser en kort besked i stedet for fejloversigten.
+runPass('4. kyu', () => false);
+assert.strictEqual(document.querySelectorAll('#mistake-list li').length, 0);
+assert.strictEqual(document.getElementById('mistake-review').hidden, true, 'fejloversigten skal skjules uden fejl');
+const noMistakes = document.getElementById('no-mistakes-message');
+assert.strictEqual(noMistakes.hidden, false, 'ingen-fejl-beskeden skal vises');
+assert.match(noMistakes.textContent, /ingen fejl/i);
+
+// Et pas med fejl viser omvendt oversigten og skjuler ingen-fejl-beskeden.
+runPass('4. kyu', i => i === 0);
+assert.strictEqual(document.getElementById('mistake-review').hidden, false);
+assert.strictEqual(noMistakes.hidden, true, 'ingen-fejl-beskeden skal skjules, når der er fejl');
+
+// Fejloversigten nulstilles ved nyt pas, ved stop og ved valg af andet bælte.
+runPass('5. kyu', i => i < 2);
+assert.strictEqual(document.querySelectorAll('#mistake-list li').length, 2);
+document.getElementById('restart-btn').click();
+assert.strictEqual(document.querySelectorAll('#mistake-list li').length, 0, 'nyt pas skal rydde fejloversigten');
+assert.strictEqual(document.getElementById('mistake-review').hidden, true);
+const abortedWrongAnswer = [...document.querySelectorAll('#answer-buttons button')]
+  .find(button => button.dataset.correct === 'false');
+assert.ok(abortedWrongAnswer, 'det afbrudte pas skal have et forkert svarvalg');
+abortedWrongAnswer.click();
+document.getElementById('quit-btn').click();
+assert.strictEqual(document.querySelectorAll('#mistake-list li').length, 0, 'stop skal rydde fejloversigten');
+assert.strictEqual(document.getElementById('mistake-review').hidden, true);
+runPass('4. kyu', () => false);
+assert.strictEqual(document.querySelectorAll('#mistake-list li').length, 0, 'fejl fra et afbrudt pas må ikke følge med til næste pas');
+assert.strictEqual(document.getElementById('no-mistakes-message').hidden, false);
+document.getElementById('back-btn').click();
+
+runPass('3. kyu', i => i < 3);
+assert.strictEqual(document.querySelectorAll('#mistake-list li').length, 3);
+document.getElementById('back-btn').click();
+assert.strictEqual(document.querySelectorAll('#mistake-list li').length, 0, 'andet bælte skal rydde fejloversigten');
+assert.strictEqual(document.getElementById('mistake-review').hidden, true);
+assert.strictEqual(document.getElementById('no-mistakes-message').hidden, true);
+
+// Fejloversigten flytter ikke fokus og tilføjer ingen ekstra live-region.
+runPass('5. kyu', i => i < 2);
+assert.strictEqual(document.activeElement.id, 'score-summary', 'fokus skal blive på resultatsammenfatningen');
+assert.strictEqual(
+  document.getElementById('result-area').getAttribute('aria-live'),
+  null,
+  'hele fejloversigten må ikke annonceres som én lang live-region; fokus på resultatsammenfatningen giver den korte besked'
+);
+for (const id of ['mistake-review', 'mistake-list', 'no-mistakes-message']) {
+  const element = document.getElementById(id);
+  assert.strictEqual(element.getAttribute('aria-live'), null, id + ' må ikke være en ekstra live-region');
+  assert.strictEqual(element.getAttribute('role'), null, id + ' må ikke have en ekstra rolle');
+  assert.strictEqual(element.getAttribute('tabindex'), null, id + ' må ikke kunne modtage automatisk fokus');
+}
+assert.strictEqual(document.querySelector('#mistake-review h3').tagName, 'H3');
+assert.strictEqual(document.getElementById('mistake-list').tagName, 'UL');
+
 console.log('✓ browseradfærd: træningspas på 10, 20 og 30 spørgsmål, alle fem bælter, feedback og valgfri lyde');
