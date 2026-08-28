@@ -45,11 +45,12 @@ function selectBelt(labelStart) {
   button.click();
 }
 
-// Orange er tilgængeligt og starter en quiz.
+// Standardvalget er et kort pas med 10 spørgsmål.
 selectBelt('4. kyu');
 assert.match(document.getElementById('question-num').textContent, /4\. kyu/);
 assert.strictEqual(document.getElementById('quiz-progress').value, 1);
-assert.strictEqual(document.getElementById('quiz-progress').max, 30);
+assert.strictEqual(document.getElementById('quiz-progress').max, 10);
+assert.match(document.getElementById('question-num').textContent, /af 10/);
 
 // Forkert svar: eksakt korrekt svar annonceres, ikoner og aria-labels sættes, sur lyd spilles.
 let buttons = [...document.querySelectorAll('#answer-buttons button')];
@@ -65,9 +66,11 @@ assert.ok(correct.querySelector('.correct-icon'));
 assert.strictEqual(correct.getAttribute('aria-label'), `Korrekt svar: ${correctText}`);
 assert.strictEqual(oscillatorStarts - startsBeforeWrong, 1, 'Forkertlyden skal starte én oscillator');
 
-// Grønt er tilgængeligt. Korrekt svar giver tretonet pling og korrekt tekst.
+// Mellempasset har 20 spørgsmål. Korrekt svar giver tretonet pling og korrekt tekst.
+document.querySelector('input[name="training-length"][value="20"]').checked = true;
 selectBelt('3. kyu');
 assert.match(document.getElementById('question-num').textContent, /3\. kyu/);
+assert.match(document.getElementById('question-num').textContent, /af 20/);
 buttons = [...document.querySelectorAll('#answer-buttons button')];
 correct = buttons.find(b => b.dataset.correct === 'true');
 const startsBeforeCorrect = oscillatorStarts;
@@ -90,7 +93,8 @@ assert.match(document.getElementById('feedback').textContent, /^Rigtigt! Det kor
 assert.ok(correct.querySelector('.correct-icon'));
 assert.strictEqual(oscillatorStarts, startsBeforeMutedAnswer, 'Ingen lyd må starte, når lyd er slået fra');
 
-// Blåt og brunt er tilgængelige og starter hver sin quiz med 30 spørgsmål.
+// Blåt og brunt er tilgængelige og starter hver sin fulde quiz med 30 spørgsmål.
+document.querySelector('input[name="training-length"][value="30"]').checked = true;
 for (const label of ['2. kyu', '1. kyu']) {
   selectBelt(label);
   assert.match(document.getElementById('question-num').textContent, new RegExp(label.replace('.', '\\.')));
@@ -103,4 +107,4 @@ assert.strictEqual(document.getElementById('quiz-area').hidden, true);
 assert.strictEqual(document.getElementById('belt-select').hidden, false);
 assert.strictEqual(document.activeElement.id, 'belt-heading');
 
-console.log('✓ browseradfærd: sammenhængende brugerrejse, alle fem bælter, feedback og valgfri lyde');
+console.log('✓ browseradfærd: træningspas på 10, 20 og 30 spørgsmål, alle fem bælter, feedback og valgfri lyde');

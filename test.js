@@ -85,6 +85,13 @@ test('appen har en tydelig start, fremdrift og afslutning på træningen', () =>
   assert.match(html, /id="home-btn"/);
 });
 
+test('brugeren kan vælge et træningspas med 10, 20 eller 30 spørgsmål', () => {
+  assert.match(html, /name="training-length" value="10" checked/);
+  assert.match(html, /name="training-length" value="20"/);
+  assert.match(html, /name="training-length" value="30"/);
+  assert.match(html, /\.slice\(0, selectedLength\)/);
+});
+
 test('repoet dokumenterer vedligeholdelse og udgivelse af spørgsmål', () => {
   const readme = fs.readFileSync('README.md', 'utf8');
   assert.match(readme, /Opdatering af spørgsmål/);
