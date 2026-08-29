@@ -145,6 +145,7 @@
       <ul id="mistake-list"></ul>
     </div>
     <p id="no-mistakes-message" hidden>Ingen fejl — du svarede rigtigt på alle spørgsmål.</p>
+    <button id="retry-mistakes-btn" hidden>Træn dine fejl igen</button>
     <button id="restart-btn">Træn samme bælte igen</button>
     <button id="back-btn">Vælg et andet bælte</button>
     <button id="home-btn" class="secondary" type="button">Afslut og gå til forsiden</button>
@@ -154,7 +155,7 @@
   <p>Kilde: Judo Danmark, <a href="https://www.judo.dk/for-klubberne/pensum"><cite>Gradueringspensum børn og ungdom 6-14 år</cite></a>, opdateret februar 2024.</p>
   <p><a href="privatliv.html">Privatliv</a> — appen bruger hverken cookies, sporing eller brugerkonti.</p>
   <p><a href="https://github.com/larsholms/judo-teori">Se koden på GitHub</a></p>
-  <p><small>Senest opdateret: 28. august 2026</small></p>
+  <p><small>Senest opdateret: 29. august 2026</small></p>
 
 </main>
 
@@ -184,6 +185,7 @@
   const mistakeReview = document.getElementById("mistake-review");
   const mistakeList = document.getElementById("mistake-list");
   const noMistakesMessage = document.getElementById("no-mistakes-message");
+  const retryMistakesBtn = document.getElementById("retry-mistakes-btn");
   const restartBtn = document.getElementById("restart-btn");
   const backBtn = document.getElementById("back-btn");
   const homeBtn = document.getElementById("home-btn");
@@ -268,6 +270,7 @@
     mistakeList.innerHTML = "";
     mistakeReview.hidden = true;
     noMistakesMessage.hidden = true;
+    retryMistakesBtn.hidden = true;
   }
 
   function showIntro() {
@@ -319,10 +322,10 @@
     });
   }
 
-  function startQuiz(key) {
+  function startQuiz(key, questionSet) {
     currentBeltKey = key;
     const selectedLength = Number(Array.from(trainingLengthInputs).find(function (input) { return input.checked; }).value);
-    questions = shuffle(QUIZ_DATA[key].questions).slice(0, selectedLength);
+    questions = questionSet ? shuffle(questionSet) : shuffle(QUIZ_DATA[key].questions).slice(0, selectedLength);
     currentIndex = 0;
     score = 0;
     clearMistakeReview();
@@ -380,7 +383,8 @@
       mistakes.push({
         question: questions[currentIndex].q,
         chosen: btn.dataset.answerText,
-        correct: correctAnswer
+        correct: correctAnswer,
+        questionData: questions[currentIndex]
       });
       feedback.textContent = "Forkert. Det rigtige svar er " + correctAnswer + ".";
       feedback.className = "wrong-text";
@@ -408,6 +412,8 @@
   function renderMistakes() {
     mistakeReview.hidden = mistakes.length === 0;
     noMistakesMessage.hidden = mistakes.length > 0;
+    retryMistakesBtn.hidden = mistakes.length === 0;
+    retryMistakesBtn.textContent = "Træn dine " + mistakes.length + " fejl igen";
     mistakes.forEach(function (mistake) {
       const item = document.createElement("li");
       const question = document.createElement("p");
@@ -420,6 +426,11 @@
       mistakeList.appendChild(item);
     });
   }
+
+  retryMistakesBtn.addEventListener("click", function () {
+    const retryQuestions = mistakes.map(function (mistake) { return mistake.questionData; });
+    startQuiz(currentBeltKey, retryQuestions);
+  });
 
   function showResult() {
     quizArea.hidden = true;

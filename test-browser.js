@@ -146,6 +146,29 @@ mistakes.forEach((mistake, i) => {
 });
 assert.match(document.querySelector('#mistake-review h3').textContent, /forkert/i);
 
+// Brugeren kan træne kun de spørgsmål, der blev besvaret forkert.
+const retryMistakesButton = document.getElementById('retry-mistakes-btn');
+assert.ok(retryMistakesButton, 'knappen til målrettet fejltræning skal findes');
+assert.strictEqual(retryMistakesButton.hidden, false, 'knappen skal vises, når passet har fejl');
+assert.match(retryMistakesButton.textContent, new RegExp(String(mistakes.length)));
+const mistakeQuestions = new Set(mistakes.map(mistake => mistake.question));
+retryMistakesButton.click();
+assert.strictEqual(document.getElementById('quiz-area').hidden, false);
+assert.strictEqual(document.getElementById('quiz-progress').max, mistakes.length);
+assert.strictEqual(document.querySelectorAll('#mistake-list li').length, 0, 'fejloversigten skal ryddes ved målrettet træning');
+for (let i = 0; i < mistakes.length; i++) {
+  assert.ok(
+    mistakeQuestions.has(document.getElementById('question-text').textContent),
+    'målrettet træning må kun indeholde spørgsmål fra fejloversigten'
+  );
+  const rightOption = [...document.querySelectorAll('#answer-buttons button')]
+    .find(button => button.dataset.correct === 'true');
+  rightOption.click();
+  document.getElementById('next-btn').click();
+}
+assert.strictEqual(document.getElementById('no-mistakes-message').hidden, false);
+assert.strictEqual(retryMistakesButton.hidden, true, 'knappen skal skjules efter et fejlfrit pas');
+
 // Et fejlfrit pas viser en kort besked i stedet for fejloversigten.
 runPass('4. kyu', () => false);
 assert.strictEqual(document.querySelectorAll('#mistake-list li').length, 0);
