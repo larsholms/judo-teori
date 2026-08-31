@@ -79,19 +79,16 @@ assert.match(document.getElementById('feedback').textContent, /^Rigtigt! Det kor
 assert.ok(correct.querySelector('.correct-icon'));
 assert.strictEqual(oscillatorStarts - startsBeforeCorrect, 3, 'Rigtigtlyden skal have tre pling-toner');
 
-// Feedbacklydene kan slås fra; tekst og ikon virker fortsat.
-const soundToggle = document.getElementById('sound-toggle');
-soundToggle.click();
-assert.strictEqual(soundToggle.textContent, 'Lyd: fra');
-assert.strictEqual(soundToggle.getAttribute('aria-pressed'), 'true');
+// Der findes ingen kontrol til at slå feedbacklyde fra; de spiller altid.
+assert.strictEqual(document.getElementById('sound-toggle'), null, 'der må ikke findes en lyd-til/fra-knap');
 selectBelt('5. kyu');
 buttons = [...document.querySelectorAll('#answer-buttons button')];
 correct = buttons.find(b => b.dataset.correct === 'true');
-const startsBeforeMutedAnswer = oscillatorStarts;
+const startsBeforeAlwaysOnAnswer = oscillatorStarts;
 correct.click();
 assert.match(document.getElementById('feedback').textContent, /^Rigtigt! Det korrekte svar er /);
 assert.ok(correct.querySelector('.correct-icon'));
-assert.strictEqual(oscillatorStarts, startsBeforeMutedAnswer, 'Ingen lyd må starte, når lyd er slået fra');
+assert.strictEqual(oscillatorStarts - startsBeforeAlwaysOnAnswer, 3, 'Rigtigtlyden skal altid spille, da lyd ikke længere kan slås fra');
 
 // Blåt og brunt er tilgængelige og starter hver sin fulde quiz med 30 spørgsmål.
 document.querySelector('input[name="training-length"][value="30"]').checked = true;
@@ -224,4 +221,4 @@ for (const id of ['mistake-review', 'mistake-list', 'no-mistakes-message']) {
 assert.strictEqual(document.querySelector('#mistake-review h3').tagName, 'H3');
 assert.strictEqual(document.getElementById('mistake-list').tagName, 'UL');
 
-console.log('✓ browseradfærd: træningspas på 10, 20 og 30 spørgsmål, alle fem bælter, feedback og valgfri lyde');
+console.log('✓ browseradfærd: træningspas på 10, 20 og 30 spørgsmål, alle fem bælter, feedback og altid tændte lyde');
