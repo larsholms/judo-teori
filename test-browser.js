@@ -66,11 +66,14 @@ assert.ok(correct.querySelector('.correct-icon'));
 assert.strictEqual(correct.getAttribute('aria-label'), `Korrekt svar: ${correctText}`);
 assert.strictEqual(oscillatorStarts - startsBeforeWrong, 1, 'Forkertlyden skal starte én oscillator');
 
-// Mellempasset har 20 spørgsmål. Korrekt svar giver tretonet pling og korrekt tekst.
-document.querySelector('input[name="training-length"][value="20"]').checked = true;
+// Der findes ikke længere en mulighed for 20 spørgsmål.
+assert.strictEqual(document.querySelector('input[name="training-length"][value="20"]'), null, 'der må ikke findes et 20-spørgsmåls-valg');
+
+// Det fulde pas har 30 spørgsmål. Korrekt svar giver tretonet pling og korrekt tekst.
+document.querySelector('input[name="training-length"][value="30"]').checked = true;
 selectBelt('3. kyu');
 assert.match(document.getElementById('question-num').textContent, /3\. kyu/);
-assert.match(document.getElementById('question-num').textContent, /af 20/);
+assert.match(document.getElementById('question-num').textContent, /af 30/);
 buttons = [...document.querySelectorAll('#answer-buttons button')];
 correct = buttons.find(b => b.dataset.correct === 'true');
 const startsBeforeCorrect = oscillatorStarts;
@@ -221,4 +224,4 @@ for (const id of ['mistake-review', 'mistake-list', 'no-mistakes-message']) {
 assert.strictEqual(document.querySelector('#mistake-review h3').tagName, 'H3');
 assert.strictEqual(document.getElementById('mistake-list').tagName, 'UL');
 
-console.log('✓ browseradfærd: træningspas på 10, 20 og 30 spørgsmål, alle fem bælter, feedback og altid tændte lyde');
+console.log('✓ browseradfærd: træningspas på 10 og 30 spørgsmål, alle fem bælter, feedback og altid tændte lyde');
