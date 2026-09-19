@@ -35,9 +35,10 @@ Det matcher den officielle kilde. Voksne kan godt bruge appen, men deres graduer
 ### 4. Domæne og hosting
 
 - `judoteori.dk` gav ingen registrering i Punktum dk's WHOIS og ingen DNS-opslag ved kontrollen; domænet ser derfor ledigt ud, men tilgængeligheden skal kontrolleres igen umiddelbart før køb.
-- GitHub Pages kan fortsat bruges som hosting til den statiske app.
-- Efter køb skal domænet forbindes til GitHub Pages via DNS og konfigureres med HTTPS.
-- Tilføj domænet i repoets Pages-indstillinger og test både `judoteori.dk` og en eventuel `www`-adresse.
+- Besluttet målarkitektur: GitHub bevares som kodearkiv og versionshistorik, mens Vercel bliver permanent host for både appen og dens serverfunktioner.
+- Det eksisterende repository forbindes med Vercel, så godkendte ændringer kan udgives derfra. GitHub Pages beholdes kun som nuværende/midlertidig udgivelse, indtil Vercel-versionen er verificeret.
+- Efter køb skal `judoteori.dk` forbindes til Vercel via DNS og konfigureres med HTTPS. Test både `judoteori.dk` og en eventuel `www`-adresse før omlægningen.
+- Flyt først den offentlige trafik, når Vercel-previewet er kontrolleret med automatiske tests, tastatur, skærmlæser og mobilvisning, så der ikke opstår unødig nedetid.
 
 ### 5. Privatliv og sikkerhed
 
@@ -50,14 +51,14 @@ Det matcher den officielle kilde. Voksne kan godt bruge appen, men deres graduer
 
 ### 6. Feedback
 
-Første version bør bruge en tydelig, tastatur- og skærmlæsertilgængelig kontaktmulighed til en dedikeret feedbackmail. Den skal bede om:
+Der skal bygges en tydelig, tastatur- og skærmlæsertilgængelig feedbackformular. Den skal bede om:
 
 - bælteniveau,
 - spørgsmålet eller fejlen,
 - hvad brugeren mener er korrekt,
 - valgfri kontaktmail.
 
-Et egentligt webformularsystem kan tilføjes senere. Det kræver en backend eller tredjepart og dermed mere arbejde med spam, opbevaring og privatliv.
+Formularen sender til en serverfunktion i samme Vercel-projekt, planlagt som `/api/feedback`. Modtageradresse og mailtjenestens nøgle opbevares som beskyttede miljøvariabler hos Vercel og må ikke ligge i den offentlige browserkode. Løsningen skal have validering, spambegrænsning, tilgængelig statusmeddelelse samt en opdateret privatlivstekst om, hvilke oplysninger der sendes og eventuelt opbevares.
 
 ### 7. Kvalitet og drift
 
@@ -104,7 +105,7 @@ Første markedsføringsindsats bør være lille og målbar:
 
 1. Udgiv versionen med blåt og brunt bælte.
 2. Indhent Lars' test og faglig stikprøve.
-3. Tilføj kontakttekst, når den dedikerede feedbackadresse er valgt. Kilde- og målgruppeteksten er på plads.
+3. Forbind repositoryet med et Vercel-preview og implementér den tilgængelige feedbackformular med `/api/feedback`; vælg mailtjeneste og modtageradresse som del af dette arbejde.
 4. Afklar Judo Danmarks tilladelse.
-5. Køb og forbind domænet.
+5. Køb `judoteori.dk`, forbind det til den verificerede Vercel-udgivelse, og behold GitHub som kodearkiv.
 6. Lancér den første offentlige version uden tracking og betaling.
