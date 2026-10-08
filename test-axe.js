@@ -35,6 +35,11 @@ function assertNoViolations(results, state) {
 
   assertNoViolations(await dom.window.axe.run(dom.window.document, axeOptions), 'efter forkert svar');
 
+  // Fejlrapportformularen skal også være uden automatiske tilgængelighedsbrud, når den åbnes.
+  dom.window.document.getElementById('report-error-btn').click();
+  assertNoViolations(await dom.window.axe.run(dom.window.document, axeOptions), 'med åben fejlrapportformular');
+  dom.window.document.getElementById('feedback-close-btn').click();
+
   // Spil passet færdigt, så resultatsiden vises med en fejloversigt.
   const document_ = dom.window.document;
   const total = document_.getElementById('quiz-progress').max;

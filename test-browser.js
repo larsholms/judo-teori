@@ -24,11 +24,33 @@ class AudioContextStub {
   resume() {}
 }
 
+const fetchCalls = [];
+const fetchResponseQueue = [];
+function queueFetchResponse(ok, data) {
+  fetchResponseQueue.push({ ok, json: () => Promise.resolve(data) });
+}
+function queueFetchPromise(promise) {
+  fetchResponseQueue.push(promise);
+}
+function fakeFetch(url, options) {
+  fetchCalls.push({ url, options });
+  const response = fetchResponseQueue.shift();
+  if (response) return Promise.resolve(response);
+  return Promise.reject(new Error('netværksfejl (ingen kø-svar til fetch)'));
+}
+
 const dom = new JSDOM(html, {
   runScripts: 'dangerously',
-  beforeParse(window) { window.AudioContext = AudioContextStub; }
+  beforeParse(window) {
+    window.AudioContext = AudioContextStub;
+    window.fetch = fakeFetch;
+  }
 });
 const document = dom.window.document;
+
+function flushPromises() {
+  return new Promise(resolve => setTimeout(resolve, 0));
+}
 
 // Starten forklarer forløbet, før brugeren vælger niveau.
 assert.strictEqual(document.getElementById('intro-area').hidden, false);
@@ -225,3 +247,87 @@ assert.strictEqual(document.querySelector('#mistake-review h3').tagName, 'H3');
 assert.strictEqual(document.getElementById('mistake-list').tagName, 'UL');
 
 console.log('✓ browseradfærd: træningspas på 10 og 30 spørgsmål, alle fem bælter, feedback og altid tændte lyde');
+
+(async function () {
+  // Rapportér fejl: knappen findes direkte ved det aktuelle spørgsmål.
+  selectBelt('5. kyu');
+  const reportBtn = document.getElementById('report-error-btn');
+  assert.strictEqual(reportBtn.hidden, false, 'knappen til fejlrapport skal være synlig ved spørgsmålet');
+  reportBtn.click();
+  assert.strictEqual(document.getElementById('feedback-form-area').hidden, false);
+  assert.strictEqual(reportBtn.hidden, true);
+  assert.strictEqual(document.activeElement.id, 'feedback-description', 'fokus skal flyttes til beskrivelsesfeltet');
+  assert.strictEqual(document.getElementById('feedback-description').tabIndex, 0, 'første felt skal blive i den normale tastaturrækkefølge');
+
+  // Tom beskrivelse blokeres med en tilgængelig fejlmeddelelse, uden at sende noget.
+  document.getElementById('feedback-submit-btn').click();
+  assert.match(document.getElementById('feedback-form-error').textContent, /beskriv/i);
+  assert.strictEqual(fetchCalls.length, 0, 'der må ikke sendes noget, når beskrivelsen mangler');
+
+  // Ugyldig e-mail blokeres også, inden noget sendes.
+  document.getElementById('feedback-description').value = 'Svaret er forkert.';
+  document.getElementById('feedback-email').value = 'ikke-en-mail';
+  document.getElementById('feedback-submit-btn').click();
+  assert.match(document.getElementById('feedback-form-error').textContent, /e-mail/i);
+  assert.strictEqual(fetchCalls.length, 0);
+
+  // Gyldig indsendelse sender bælte, spørgsmål, korrekt svar og brugerens forslag til /api/feedback.
+  document.getElementById('feedback-email').value = '';
+  document.getElementById('feedback-correction').value = 'Det korrekte ord er anderledes.';
+  queueFetchResponse(true, { ok: true });
+  document.getElementById('feedback-submit-btn').click();
+  await flushPromises();
+
+  assert.strictEqual(fetchCalls.length, 1);
+  assert.strictEqual(fetchCalls[0].url, '/api/feedback');
+  const sentPayload = JSON.parse(fetchCalls[0].options.body);
+  assert.match(sentPayload.belt, /5\. kyu/);
+  assert.ok(sentPayload.question.length > 0, 'det aktuelle spørgsmål skal medsendes');
+  assert.ok(sentPayload.correctAnswer.length > 0, 'det korrekte svar skal medsendes');
+  assert.strictEqual(sentPayload.description, 'Svaret er forkert.');
+  assert.strictEqual(sentPayload.correction, 'Det korrekte ord er anderledes.');
+  assert.strictEqual(sentPayload.website, '', 'honeypot-feltet skal sendes tomt for en rigtig bruger');
+  assert.strictEqual(typeof sentPayload.openedAt, 'number');
+
+  assert.strictEqual(document.getElementById('feedback-form').hidden, true, 'formularen skjules efter succesfuld afsendelse');
+  assert.match(document.getElementById('feedback-status').textContent, /tak/i);
+  assert.strictEqual(document.activeElement.id, 'feedback-status', 'fokus skal flyttes til kvitteringen for skærmlæserbrugere');
+
+  // Luk-knappen nulstiller formularen og fører fokus tilbage til rapportér-knappen.
+  document.getElementById('feedback-close-btn').click();
+  assert.strictEqual(document.getElementById('feedback-form-area').hidden, true);
+  assert.strictEqual(document.activeElement.id, 'report-error-btn');
+  assert.strictEqual(document.getElementById('feedback-form').hidden, false, 'formularen skal være synlig igen ved næste åbning');
+
+  // Et fejlsvar fra serveren vises som den generiske, sikre besked serveren sendte.
+  reportBtn.click();
+  document.getElementById('feedback-description').value = 'Endnu en fejlbeskrivelse.';
+  queueFetchResponse(false, { error: 'Beskriv venligst fejlen (op til 1000 tegn).' });
+  document.getElementById('feedback-submit-btn').click();
+  await flushPromises();
+  assert.match(document.getElementById('feedback-status').textContent, /beskriv venligst fejlen/i);
+  assert.strictEqual(document.getElementById('feedback-submit-btn').disabled, false, 'knappen skal kunne bruges igen efter en fejl');
+
+  // Et sent serversvar må ikke flytte fokus eller ændre en formular, brugeren allerede har lukket.
+  document.getElementById('feedback-close-btn').click();
+  reportBtn.click();
+  document.getElementById('feedback-description').value = 'Lukkes under afsendelse.';
+  let resolvePendingFetch;
+  queueFetchPromise(new Promise(function (resolve) { resolvePendingFetch = resolve; }));
+  document.getElementById('feedback-submit-btn').click();
+  document.getElementById('feedback-close-btn').click();
+  assert.strictEqual(document.activeElement.id, 'report-error-btn');
+  resolvePendingFetch({ ok: true, json: () => Promise.resolve({ ok: true }) });
+  await flushPromises();
+  assert.strictEqual(document.activeElement.id, 'report-error-btn', 'et sent svar må ikke stjæle fokus efter lukning');
+  assert.strictEqual(document.getElementById('feedback-status').textContent, '', 'et sent svar må ikke skrive i den lukkede formular');
+
+  // En netværksfejl (fx hvis /api/feedback ikke findes) viser en generisk dansk besked.
+  reportBtn.click();
+  document.getElementById('feedback-description').value = 'Beskrivelse ved netværksfejl.';
+  document.getElementById('feedback-submit-btn').click();
+  await flushPromises();
+  assert.match(document.getElementById('feedback-status').textContent, /der opstod en fejl/i);
+
+  console.log('✓ fejlrapportformular: åbning, validering, afsendelse, luk og fejlhåndtering');
+})().catch(err => { console.error(err); process.exit(1); });

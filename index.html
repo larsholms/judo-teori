@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'none'; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Judo-Teori Træner</title>
 <style>
@@ -17,6 +17,7 @@
     --focus: #ffcf5c;
   }
   * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
   body {
     background: var(--bg);
     color: var(--text);
@@ -85,6 +86,42 @@
   }
   .skip-link:focus { left: 0.5rem; top: 0.5rem; }
 
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  #feedback-form-area {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+  }
+  #feedback-form-area h3 { margin-top: 0; font-size: 1.05rem; }
+  #feedback-form-area label { display: block; font-weight: bold; margin-bottom: 0.3rem; }
+  #feedback-form-area textarea,
+  #feedback-form-area input[type="email"],
+  #feedback-form-area input[type="text"] {
+    width: 100%;
+    padding: 0.6rem;
+    border-radius: 8px;
+    border: 2px solid #555;
+    background: var(--bg);
+    color: var(--text);
+    font: inherit;
+    margin-bottom: 0.8rem;
+  }
+  #feedback-form-area textarea:focus-visible,
+  #feedback-form-area input:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+  }
+  #feedback-form-error { color: var(--wrong); font-weight: bold; min-height: 1.4rem; }
+  #feedback-status { font-weight: bold; min-height: 1.4rem; }
+
   @media (min-width: 720px) {
     body {
       max-width: 760px;
@@ -141,7 +178,34 @@
     <div id="answer-buttons" role="group" aria-label="Svarmuligheder"></div>
     <p id="feedback" role="status" aria-live="assertive"></p>
     <button id="next-btn" hidden>Næste spørgsmål</button>
+    <button id="report-error-btn" class="secondary" type="button">Rapportér fejl i dette spørgsmål</button>
     <button id="quit-btn" class="secondary" type="button">Stop og vælg bælte</button>
+
+    <section id="feedback-form-area" hidden aria-labelledby="feedback-form-heading">
+      <h3 id="feedback-form-heading">Rapportér fejl i spørgsmålet</h3>
+      <button type="button" id="feedback-close-btn" class="secondary">Luk</button>
+      <form id="feedback-form" novalidate>
+        <div>
+          <label for="feedback-description">Hvad er der galt med spørgsmålet eller svaret?</label>
+          <textarea id="feedback-description" name="description" rows="3" maxlength="1000" required></textarea>
+        </div>
+        <div>
+          <label for="feedback-correction">Hvad mener du er korrekt? (valgfrit)</label>
+          <textarea id="feedback-correction" name="correction" rows="2" maxlength="500"></textarea>
+        </div>
+        <div>
+          <label for="feedback-email">Din e-mail, hvis du vil have svar (valgfrit)</label>
+          <input id="feedback-email" name="email" type="email" autocomplete="email">
+        </div>
+        <div class="visually-hidden" aria-hidden="true">
+          <label for="feedback-website">Udfyld ikke dette felt</label>
+          <input id="feedback-website" name="website" type="text" tabindex="-1" autocomplete="off">
+        </div>
+        <p id="feedback-form-error" role="alert"></p>
+        <button type="submit" id="feedback-submit-btn">Send fejlrapport</button>
+      </form>
+      <p id="feedback-status" role="status" aria-live="polite"></p>
+    </section>
   </section>
 
   <section id="result-area" class="panel" hidden>
@@ -163,7 +227,7 @@
   <p>Kilde: Judo Danmark, <a href="https://www.judo.dk/for-klubberne/pensum"><cite>Gradueringspensum børn og ungdom 6-14 år</cite></a>, opdateret februar 2024.</p>
   <p><a href="privatliv.html">Privatliv</a> — appen bruger hverken cookies, sporing eller brugerkonti.</p>
   <p><a href="https://github.com/larsholms/judo-teori">Se koden på GitHub</a></p>
-  <p><small>Senest opdateret: 29. august 2026</small></p>
+  <p><small>Senest opdateret: 28. september 2026</small></p>
 
 </main>
 
@@ -187,7 +251,18 @@
   const answerButtons = document.getElementById("answer-buttons");
   const feedback = document.getElementById("feedback");
   const nextBtn = document.getElementById("next-btn");
+  const reportErrorBtn = document.getElementById("report-error-btn");
   const quitBtn = document.getElementById("quit-btn");
+  const feedbackFormArea = document.getElementById("feedback-form-area");
+  const feedbackForm = document.getElementById("feedback-form");
+  const feedbackDescription = document.getElementById("feedback-description");
+  const feedbackCorrection = document.getElementById("feedback-correction");
+  const feedbackEmail = document.getElementById("feedback-email");
+  const feedbackWebsite = document.getElementById("feedback-website");
+  const feedbackFormError = document.getElementById("feedback-form-error");
+  const feedbackSubmitBtn = document.getElementById("feedback-submit-btn");
+  const feedbackCloseBtn = document.getElementById("feedback-close-btn");
+  const feedbackStatus = document.getElementById("feedback-status");
   const scoreSummary = document.getElementById("score-summary");
   const resultMessage = document.getElementById("result-message");
   const mistakeReview = document.getElementById("mistake-review");
@@ -203,8 +278,12 @@
   let currentIndex = 0;
   let score = 0;
   let answered = false;
+  let answeredSelectionText = null;
   let mistakes = [];
   let audioContext = null;
+  let feedbackOpenedAt = null;
+  let feedbackRequestGeneration = 0;
+  const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   function getAudioContext() {
     if (!audioContext) {
@@ -336,9 +415,11 @@
 
   function showQuestion() {
     answered = false;
+    answeredSelectionText = null;
     feedback.textContent = "";
     feedback.className = "";
     nextBtn.hidden = true;
+    hideFeedbackForm();
     const q = questions[currentIndex];
     quizProgress.max = questions.length;
     quizProgress.value = currentIndex + 1;
@@ -364,6 +445,7 @@
   function selectAnswer(btn, isCorrect) {
     if (answered) return;
     answered = true;
+    answeredSelectionText = btn.dataset.answerText;
     const allButtons = answerButtons.querySelectorAll("button");
     allButtons.forEach(function (b) { b.disabled = true; });
 
@@ -397,6 +479,100 @@
     nextBtn.hidden = false;
     nextBtn.focus();
   }
+
+  function resetFeedbackForm() {
+    feedbackForm.reset();
+    feedbackForm.hidden = false;
+    feedbackFormError.textContent = "";
+    feedbackStatus.textContent = "";
+    feedbackStatus.removeAttribute("tabindex");
+    feedbackSubmitBtn.disabled = false;
+  }
+
+  function hideFeedbackForm() {
+    feedbackRequestGeneration++;
+    feedbackFormArea.hidden = true;
+    reportErrorBtn.hidden = false;
+    resetFeedbackForm();
+  }
+
+  function openFeedbackForm() {
+    resetFeedbackForm();
+    feedbackRequestGeneration++;
+    feedbackOpenedAt = Date.now();
+    feedbackFormArea.hidden = false;
+    reportErrorBtn.hidden = true;
+    feedbackDescription.focus();
+  }
+
+  function closeFeedbackForm() {
+    hideFeedbackForm();
+    reportErrorBtn.focus();
+  }
+
+  reportErrorBtn.addEventListener("click", openFeedbackForm);
+  feedbackCloseBtn.addEventListener("click", closeFeedbackForm);
+
+  feedbackForm.addEventListener("submit", function (event) {
+    event.preventDefault();
+    const description = feedbackDescription.value.trim();
+    feedbackFormError.textContent = "";
+
+    if (!description) {
+      feedbackFormError.textContent = "Skriv venligst en kort beskrivelse af fejlen.";
+      feedbackDescription.focus();
+      return;
+    }
+
+    const email = feedbackEmail.value.trim();
+    if (email && !EMAIL_PATTERN.test(email)) {
+      feedbackFormError.textContent = "E-mailadressen ser ikke gyldig ud.";
+      feedbackEmail.focus();
+      return;
+    }
+
+    feedbackSubmitBtn.disabled = true;
+    feedbackStatus.textContent = "Sender…";
+
+    const q = questions[currentIndex];
+    const payload = {
+      belt: QUIZ_DATA[currentBeltKey].label,
+      question: q.q,
+      correctAnswer: q.options[q.answer],
+      userAnswer: answeredSelectionText,
+      description: description,
+      correction: feedbackCorrection.value.trim(),
+      email: email,
+      website: feedbackWebsite.value,
+      openedAt: feedbackOpenedAt
+    };
+    const requestGeneration = feedbackRequestGeneration;
+
+    fetch("/api/feedback", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    }).then(function (response) {
+      return response.json().catch(function () { return {}; }).then(function (data) {
+        return { ok: response.ok, data: data };
+      });
+    }).then(function (result) {
+      if (requestGeneration !== feedbackRequestGeneration) return;
+      if (!result.ok) {
+        feedbackSubmitBtn.disabled = false;
+        feedbackStatus.textContent = (result.data && result.data.error) || "Der opstod en fejl. Prøv venligst igen om lidt.";
+        return;
+      }
+      feedbackForm.hidden = true;
+      feedbackStatus.textContent = "Tak! Din feedback er sendt.";
+      feedbackStatus.setAttribute("tabindex", "-1");
+      feedbackStatus.focus();
+    }).catch(function () {
+      if (requestGeneration !== feedbackRequestGeneration) return;
+      feedbackSubmitBtn.disabled = false;
+      feedbackStatus.textContent = "Der opstod en fejl. Prøv venligst igen om lidt.";
+    });
+  });
 
   nextBtn.addEventListener("click", function () {
     currentIndex++;

@@ -101,13 +101,22 @@ test('repoet dokumenterer vedligeholdelse og udgivelse af spørgsmål', () => {
   assert.match(readme, /Judo Danmark/);
 });
 
+test('README dokumenterer feedback-miljøvariabler uden at afsløre hemmeligheder', () => {
+  const readme = fs.readFileSync('README.md', 'utf8');
+  for (const name of ['FEEDBACK_TO_EMAIL', 'SMTP_HOST', 'SMTP_USER', 'SMTP_PASSWORD', 'RESEND_API_KEY']) {
+    assert.ok(readme.includes(name), 'README mangler ' + name);
+  }
+  assert.doesNotMatch(readme, /@gmail\.com|@[a-z0-9.-]+\.(dk|com)`/i);
+});
+
 test('appen har en restriktiv sikkerhedspolitik og referrer-politik', () => {
   assert.match(html, /http-equiv="Content-Security-Policy"/i);
   assert.match(html, /default-src 'self'/i);
   assert.match(html, /object-src 'none'/i);
   assert.match(html, /base-uri 'none'/i);
-  assert.match(html, /connect-src 'none'/i);
+  assert.match(html, /connect-src 'self'/i);
   assert.match(html, /name="referrer" content="strict-origin-when-cross-origin"/i);
+  assert.match(html, /\[hidden\]\s*\{\s*display:\s*none\s*!important;?\s*\}/i, 'hidden skal altid skjule knapper visuelt');
 
   const privacyHtml = fs.readFileSync('privatliv.html', 'utf8');
   assert.match(privacyHtml, /http-equiv="Content-Security-Policy"/i);
@@ -156,4 +165,42 @@ test('feedbackfarver har mindst WCAG AA-kontrast mod panelet', () => {
     const color = html.match(new RegExp(`--${variable}:\\s*(#[0-9a-f]{6})`, 'i'))[1];
     assert.ok(contrast(color, panel) >= 4.5, `${variable} har for lav kontrast`);
   }
+});
+
+test('spørgsmålet har en knap til at rapportere fejl direkte ved spørgsmål og svar', () => {
+  assert.match(html, /id="report-error-btn"/);
+  assert.match(html, /id="feedback-form-area"/);
+  assert.match(html, /Rapportér fejl/i);
+});
+
+test('fejlrapportformularen beder om beskrivelse, forslag til rettelse og valgfri e-mail', () => {
+  assert.match(html, /id="feedback-description"[^>]*required/);
+  assert.match(html, /id="feedback-correction"/);
+  assert.match(html, /id="feedback-email"[^>]*type="email"/);
+});
+
+test('fejlrapportformularen har et skjult honeypot-felt til spambeskyttelse', () => {
+  assert.match(html, /id="feedback-website"/);
+  assert.match(html, /id="feedback-website"[^>]*tabindex="-1"/);
+  const honeypotBlock = html.match(/<div class="visually-hidden" aria-hidden="true">[\s\S]*?feedback-website[\s\S]*?<\/div>/);
+  assert.ok(honeypotBlock, 'honeypot-feltet skal være visuelt skjult og skjult for skærmlæsere');
+});
+
+test('fejlrapportformularen annoncerer fejl og status tilgængeligt', () => {
+  assert.match(html, /id="feedback-form-error" role="alert"/);
+  assert.match(html, /id="feedback-status" role="status" aria-live="polite"/);
+});
+
+test('fejlrapportens Luk-knap kommer før formularfelterne i tastaturrækkefølgen', () => {
+  const staticMarkup = html.split('<script src="data.js"></script>')[0];
+  assert.ok(
+    staticMarkup.indexOf('id="feedback-close-btn"') < staticMarkup.indexOf('id="feedback-description"'),
+    'Shift+Tab fra første felt skal føre til Luk-knappen'
+  );
+});
+
+test('appen sender fejlrapporter til /api/feedback uden at eksponere modtageradresse eller nøgler', () => {
+  assert.match(html, /fetch\("\/api\/feedback"/);
+  assert.doesNotMatch(html, /smtp\.dk/i);
+  assert.doesNotMatch(html, /@gmail\.com|@[a-z0-9.-]+\.(dk|com)"/i);
 });

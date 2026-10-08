@@ -51,14 +51,16 @@ Det matcher den officielle kilde. Voksne kan godt bruge appen, men deres graduer
 
 ### 6. Feedback
 
-Der skal bygges en tydelig, tastatur- og skærmlæsertilgængelig feedbackformular. Den skal bede om:
+Implementeret: en tastatur- og skærmlæsertilgængelig feedbackformular sidder direkte ved det aktuelle spørgsmål (knappen “Rapportér fejl i dette spørgsmål”). Den medsender automatisk:
 
-- bælteniveau,
-- spørgsmålet eller fejlen,
-- hvad brugeren mener er korrekt,
+- bælteniveau, spørgsmålet og det korrekte svar (samt brugerens eget svar, hvis besvaret),
+- en obligatorisk beskrivelse af fejlen,
+- valgfrit forslag til rettelse,
 - valgfri kontaktmail.
 
-Formularen sender til en serverfunktion i samme Vercel-projekt, planlagt som `/api/feedback`. Modtageradresse og mailtjenestens nøgle opbevares som beskyttede miljøvariabler hos Vercel og må ikke ligge i den offentlige browserkode. Løsningen skal have validering, spambegrænsning, tilgængelig statusmeddelelse samt en opdateret privatlivstekst om, hvilke oplysninger der sendes og eventuelt opbevares.
+Formularen sender til `/api/feedback`, en Vercel Node.js-serverfunktion (kode i `api/` og `lib/`). Modtageradresse og mailtjenestens adgangsoplysninger opbevares udelukkende som beskyttede miljøvariabler hos Vercel — se `README.md`, afsnittet “Feedbackfunktion”, for de konkrete variabelnavne (uden værdier). SMTP.dk er valgt som primær mailtransport (SMTP AUTH over implicit TLS); Resend er den godkendte fallback, hvis SMTP.dk ikke kan bruges fra Vercels servermiljø.
+
+Løsningen har feltvalidering, et honeypot-felt, en minimumstid fra åbning til indsendelse, en pr.-IP-rate-grænse og generiske fejlmeddelelser til brugeren. Udestår før lancering: opdatér `privatliv.html`, så den også dækker feedbackdata (gjort), og verificér de rigtige SMTP.dk-/Resend-adgangsoplysninger direkte i Vercels miljø, når projektet forbindes (kan ikke testes uden at kontakte en reel tredjepart under selve udviklingen).
 
 ### 7. Kvalitet og drift
 
@@ -105,7 +107,7 @@ Første markedsføringsindsats bør være lille og målbar:
 
 1. Udgiv versionen med blåt og brunt bælte.
 2. Indhent Lars' test og faglig stikprøve.
-3. Forbind repositoryet med et Vercel-preview og implementér den tilgængelige feedbackformular med `/api/feedback`; vælg mailtjeneste og modtageradresse som del af dette arbejde.
+3. Forbind repositoryet med et Vercel-preview. Den tilgængelige feedbackformular og `/api/feedback` er implementeret i koden; udestår er at sætte de rigtige SMTP.dk- (eller evt. Resend-) adgangsoplysninger og modtageradressen op som miljøvariabler hos Vercel og verificere afsendelsen i preview.
 4. Afklar Judo Danmarks tilladelse.
 5. Køb `judoteori.dk`, forbind det til den verificerede Vercel-udgivelse, og behold GitHub som kodearkiv.
 6. Lancér den første offentlige version uden tracking og betaling.

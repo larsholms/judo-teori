@@ -3,8 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "main": "data.js",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
-    "test": "node test.js && node test-browser.js && node test-axe.js && node test-responsive.js"
+    "test": "node test.js && node test-browser.js && node test-axe.js && node test-responsive.js && node test-feedback-validation.js && node test-smtp-client.js && node test-mail-sender.js && node test-feedback-handler.js"
   },
   "repository": {
     "type": "git",
